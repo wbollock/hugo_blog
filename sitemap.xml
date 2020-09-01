@@ -3,26 +3,26 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>http://192.168.0.180/blog/public/post/</loc>
+    <loc>https://wboll.dev/blog/public/post/</loc>
     <lastmod>2020-09-01T11:42:00-04:00</lastmod>
   </url>
   
   <url>
-    <loc>http://192.168.0.180/blog/public/post/intro/</loc>
+    <loc>https://wboll.dev/blog/public/post/intro/</loc>
     <lastmod>2020-09-01T11:42:00-04:00</lastmod>
   </url>
   
   <url>
-    <loc>http://192.168.0.180/blog/public/</loc>
+    <loc>https://wboll.dev/blog/public/</loc>
     <lastmod>2020-09-01T11:42:00-04:00</lastmod>
   </url>
   
   <url>
-    <loc>http://192.168.0.180/blog/public/categories/</loc>
+    <loc>https://wboll.dev/blog/public/categories/</loc>
   </url>
   
   <url>
-    <loc>http://192.168.0.180/blog/public/tags/</loc>
+    <loc>https://wboll.dev/blog/public/tags/</loc>
   </url>
   
 </urlset>

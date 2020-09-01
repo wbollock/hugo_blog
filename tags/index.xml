@@ -1,7 +1,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
 		<title>Tags on Will Bollock&#39;s Blog</title>
-		<link>http://192.168.0.180/blog/public/tags/</link>
+		<link>https://wboll.dev/blog/public/tags/</link>
 		<description>Recent content in Tags </description>
 		<generator>Hugo -- gohugo.io</generator>
 		
@@ -13,9 +13,9 @@
 		
 		<item>
 			<title>Torch - Command line for the student masses</title>
-			<link>http://192.168.0.180/blog/public/post/intro/</link>
+			<link>https://wboll.dev/blog/public/post/intro/</link>
 			<pubDate>Tue, 01 Sep 2020 11:42:00 -0400</pubDate>
-			<guid>http://192.168.0.180/blog/public/post/intro/</guid>
+			<guid>https://wboll.dev/blog/public/post/intro/</guid>
 			<description>Test test
 title 2 test test test</description>
 		</item>
