@@ -1,0 +1,24 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Categories on Will Bollock&#39;s Blog</title>
+		<link>http://192.168.0.180/blog/public/categories/</link>
+		<description>Recent content in Categories </description>
+		<generator>Hugo -- gohugo.io</generator>
+		
+  		<language>en</language>
+		
+		<managingEditor>Page(/categories) (Will Bollock)</managingEditor>
+    	
+		<atom:link href="/blog/public/categories/" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>Torch - Command line for the student masses</title>
+			<link>http://192.168.0.180/blog/public/post/intro/</link>
+			<pubDate>Tue, 01 Sep 2020 11:42:00 -0400</pubDate>
+			<guid>http://192.168.0.180/blog/public/post/intro/</guid>
+			<description>Test test
+title 2 test test test</description>
+		</item>
+      	
+	</channel>
+</rss>
