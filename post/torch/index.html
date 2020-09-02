@@ -93,9 +93,9 @@
 <p>Myself and my fellow system administrator wanted to create a sandbox for our students. One singular server to rule them all. A hostname easy to remember, credentials that matched their university experience across all services, and something accessible to students simply wanting to do well in their class and never continue beyond their grade.</p>
 <h2 id="what-we-did-uniquely">What We Did Uniquely</h2>
 <h3 id="sso-and-credentials">SSO and Credentials</h3>
-<p>SSO is the shit. No holds barred, SSO is the light of my sysadmin life. Every service we employ, whether it&rsquo;s logging, monitoring, or Ansible automation, needs to have SSO. Besides security benefits, it&rsquo;s just so convinenet. Our students did not know such joy, recieving a list of usernames and passwords from instructors they would need to pull up before starting every assignment.</p>
+<p>SSO is the shit. No holds barred, SSO is the light at the end of the sysadmin tunnel. Every service we employ, whether it&rsquo;s logging, monitoring, or Ansible automation, needs to have SSO. Besides security benefits, it&rsquo;s just so convinenet. Our students did not know such joy, recieving a list of usernames and passwords from instructors they would need to pull up before starting every assignment.</p>
 <p>(Link to SSSD here)
-<strong>SSSD</strong> was our countermeasure to individualzied credentials. Ironically my first project as a HelpDesk technician, SSSD allows fine tuning our Linux authentication from /etc/sudoers to SSH access. Despite being on Debian-based systems, SSSD is the core component of our Ansible configuration and delegating access to our systems.</p>
+<strong><a href="https://sssd.io/">SSSD</a></strong> was our counter-measure for individualzied credentials. My first project as a HelpDesk technician, SSSD allows fine tuning our Linux authentication from /etc/sudoers to SSH access. Despite being on Debian-based systems, SSSD is the core component of our Ansible configuration and delegating access to our systems.</p>
 <h3 id="what-about-mysql-credentials">What about MySQL credentials?</h3>
 <p>While it is certainly <em>possible</em> to use PAM in conjuction with MySQL, that was one layer of abstraction too far. I was shaking up class procedures that have been in place for a decade - faculty might not appreciate a complete and total overhaul.</p>
 <p>In comes postfix, and my fellow sysadmin&rsquo;s great web design (he used <a href="https://heml.io/">HEML</a> for creating the HTML email).</p>
@@ -104,12 +104,12 @@
 <p><strong>The important part</strong>: Students recieve this email at their student address on their first connection, regardless of connection type:</p>
 <ol>
 <li>SSH</li>
-<li>SFTP!!</li>
+<li><strong>SFTP</strong></li>
 <li>MySQL Workbench</li>
 </ol>
 <h3 id="solving-the-sftp-problem">Solving the SFTP problem</h3>
 <p>Back to the main problem we were solving, making the host accessible for students regardless of initial skill level, we had to not only trigger our MySQL account creation on tradational SSH (also accounts for MySQL Workbench), but for SFTP through FileZilla, Transmit, etc.</p>
-<p>This was tough. Tradational methods of taking action upon first time account creation didn&rsquo;t work well - /etc/profile.d, /etc/skel, etc. all failed the SFTP litmus test.</p>
+<p>This was tough. Conventional methods of taking action upon first time account creation didn&rsquo;t work well - /etc/profile.d, /etc/skel, etc. all failed the SFTP litmus test.</p>
 <p>In comes <strong><a href="https://linux.die.net/man/1/inotifywatch">inotifywatch</a></strong>. A beautiful utility that helps monitor directories for changes. The one assumption I had about SSH and SFTP was that a new folder in /home/ would be created with the user&rsquo;s username.</p>
 <pre><code># infinite loop
 while true
@@ -166,13 +166,15 @@ Using a web browser, go to https://torch.cci.fsu.edu/~FSUID. Did your site load 
 <p><img src="../tickets.png" alt="tickets"></p>
 <p>I eventually setup an auto-responder for the sheer amount of tickets that we could not assist with.</p>
 <p>Some commands I didn&rsquo;t expect users to run:</p>
-<pre><code>apt install putty-tools (Obviously, student's don't have sudo access)
+<pre><code>apt install putty-tools (Obviously, students don't have sudo access)
 
 /mnt/c/Users/some_student$ ssh some_student@torch.cci.fsu.edu (Copying Windows CMD SSH, and trying to SSH into the server they're already logged into)
 
 cd C:\Users\some_student\Desktop (Self Explanatory)
 
 </code></pre><p>Thankfully we had Graylog setup to easily parse through command history. My point here is not to make fun of students not having a solid grasp on the command line - only to point out that I didn&rsquo;t expect such issues from my testing or thought process. We&rsquo;ve all been there before.</p>
+<h2 id="after-action-report">After Action Report</h2>
+<p>All in all, my first major project for the general public (students in my university&rsquo;s college) went well. We had around 125 accounts created, and maybe 20 tickets created needing help. ~16% of students having issues is not a good metric. However, with better understanding for faculty, and much improved help resources on the main domain, this should be easier every semester to come.</p>
 
 
 
