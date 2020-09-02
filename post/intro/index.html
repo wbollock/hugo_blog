@@ -71,12 +71,31 @@
   <div class="container" role="main">
     <article class="article" class="blog-post">
       
-    <h1 id="test">Test</h1>
-<p>test</p>
-<h2 id="title-2">title 2</h2>
-<p>test test test</p>
-<h2 id="deploysh-test">Deploy.sh test</h2>
-<p>yoo</p>
+    <p>Remember to spellcheck asswipe</p>
+<h1 id="forward---what-you-can-gain-from-reading-this">Forward - What You Can Gain from Reading This</h1>
+<p>If you&rsquo;re a system administrator looking for unique ways to incorporate Linux servers with class ciricumcliums, this article may inspire methodologies on bringing the command line to the student masses.</p>
+<p>I asked on reddit&rsquo;s /r/linuxadmin how they handle student-accessible servers. Many ideas were brought up - segmented Docker containers, locked down hosts, restrictive commands. I went with what I know best: a dose of Ansible, glorious SSSD, and trusty Bash.</p>
+<h1 id="the-problem">The Problem</h1>
+<p>One unfortunate reality I&rsquo;ve discovered, moving from an undergraduate IT student, to System Administrator pursing a Master&rsquo;s in IT, is that not all students share the same love of the Linux command line as I do.</p>
+<p>Most student&rsquo;s view the command line - a requirement for their Intro to MySQL class, or basic web development - as an obtuse, ancient obstacle for submitting their assignments.</p>
+<p>The goal: provide a server (Torch) that will be equally accessible to students that require a GUI for every application, and &ldquo;power user&rdquo; students itching for freedom on a university funded psuedo-VPS.</p>
+<h2 id="the-rising-action">The Rising Action</h2>
+<p>Previously, CCI operated 4 or so hosts, one for each class that required some server space.</p>
+<ul>
+<li>Each instructor created SSH accounts manually for each student - often with credentials shared <strong>class-wide</strong>. Students had no sense of privacy or identity with their Linux accounts.</li>
+<li>After class was over, students lost connection with their account. No way would they continue to use, or could use, accounts spanning across servers named by their course code (LIS1234, LIS4321, LIS5666, etc.)</li>
+<li>Advanced students had trouble developing personal projects on hosts without SSL, or permissions for multiple MySQL databases. How would we foster the next Zuckerberg without giving students the tools to experiment?</li>
+</ul>
+<p>Myself and my fellow system administrator wanted to create a sandbox for our students. One singular server to rule them all. A hostname easy to remember, credentials that matched their university experience across all services, and something accessible to students simply wanting to do well in their class and never continue beyond their grade.</p>
+<h2 id="what-we-did-uniquely">What We Did Uniquely</h2>
+<h3 id="sso-and-credentials">SSO and Credentials</h3>
+<p>SSO is the shit. No holds barred, SSO is the light of my sysadmin life. Every service we employ, whether it&rsquo;s logging, monitoring, or Ansible automation, needs to have SSO. Besides security benefits, it&rsquo;s just so convinenet. Our students did not know such joy, recieving a list of usernames and passwords from instructors they would need to pull up before starting every assignment.</p>
+<p>(Link to SSSD here)
+<strong>SSSD</strong> was our countermeasure to individualzied credentials. Ironically my first project as a HelpDesk technician, SSSD allows fine tuning our Linux authentication from /etc/sudoers to SSH access. Despite being on Debian-based systems, SSSD is the core component of our Ansible configuration and delegating access to our systems.</p>
+<h3 id="what-about-mysql-credentials">What about MySQL credentials?</h3>
+<p>While it is certainly <em>possible</em> to use PAM in conjuction with MySQL, that was one layer of abstraction too far. I was shaking up class procedures that have been in place for a decade - faculty might not appreciate a complete and total overhaul.</p>
+<p>In comes postfix, and my fellow sysadmin&rsquo;s great web design (he used <a href="https://heml.io/">HEML</a> for creating the HTML email).</p>
+<p><img src="img/torch_email.png" alt="Torch Email"></p>
 
 
 
