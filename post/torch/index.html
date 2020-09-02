@@ -74,7 +74,11 @@
     <p>Remember to spellcheck asswipe</p>
 <h1 id="forward---what-you-can-gain-from-reading-this">Forward - What You Can Gain from Reading This</h1>
 <p>If you&rsquo;re a system administrator looking for unique ways to incorporate Linux servers with class ciricumcliums, this article may inspire methodologies on bringing the command line to the student masses.</p>
-<p>I asked on reddit&rsquo;s /r/linuxadmin how they handle student-accessible servers. Many ideas were brought up - segmented Docker containers, locked down hosts, restrictive commands. I went with what I know best: a dose of Ansible, glorious SSSD, and trusty Bash.</p>
+<p>I asked on reddit&rsquo;s /r/linuxadmin how they handle student-accessible servers. Many ideas were brought up - segmented Docker containers, locked down hosts, restrictive commands. I went with what I know best: a strong dose of Ansible, glorious SSSD, and trusty Bash.</p>
+<p>Links:</p>
+<ul>
+<li><a href="https://gist.github.com/wbollock/c42f68868515362dc2f890628f667fb2">Main script</a> to watch for account creation, create MySQL account, and fire off creds to student</li>
+</ul>
 <h1 id="the-problem">The Problem</h1>
 <p>One unfortunate reality I&rsquo;ve discovered, moving from an undergraduate IT student, to System Administrator pursing a Master&rsquo;s in IT, is that not all students share the same love of the Linux command line as I do.</p>
 <p>Most student&rsquo;s view the command line - a requirement for their Intro to MySQL class, or basic web development - as an obtuse, ancient obstacle for submitting their assignments.</p>
@@ -96,6 +100,79 @@
 <p>While it is certainly <em>possible</em> to use PAM in conjuction with MySQL, that was one layer of abstraction too far. I was shaking up class procedures that have been in place for a decade - faculty might not appreciate a complete and total overhaul.</p>
 <p>In comes postfix, and my fellow sysadmin&rsquo;s great web design (he used <a href="https://heml.io/">HEML</a> for creating the HTML email).</p>
 <p><img src="../torch_email.png" alt="Torch Email"></p>
+<p>As you can see here, we are in-tune with the youth of today, adding emojis. The MySQL password is randomized with a little salt shaken on top.</p>
+<p><strong>The important part</strong>: Students recieve this email at their student address on their first connection, regardless of connection type:</p>
+<ol>
+<li>SSH</li>
+<li>SFTP!!</li>
+<li>MySQL Workbench</li>
+</ol>
+<h3 id="solving-the-sftp-problem">Solving the SFTP problem</h3>
+<p>Back to the main problem we were solving, making the host accessible for students regardless of initial skill level, we had to not only trigger our MySQL account creation on tradational SSH (also accounts for MySQL Workbench), but for SFTP through FileZilla, Transmit, etc.</p>
+<p>This was tough. Tradational methods of taking action upon first time account creation didn&rsquo;t work well - /etc/profile.d, /etc/skel, etc. all failed the SFTP litmus test.</p>
+<p>In comes <strong><a href="https://linux.die.net/man/1/inotifywatch">inotifywatch</a></strong>. A beautiful utility that helps monitor directories for changes. The one assumption I had about SSH and SFTP was that a new folder in /home/ would be created with the user&rsquo;s username.</p>
+<pre><code># infinite loop
+while true
+do
+
+# upon new /home/ directory creation, spit out the username to $FSUID
+FSUID=$(inotifywait -q -e create /home/ | awk '{ print $NF }')
+</code></pre><p>Then check to see if the user already has an account - if not, their MySQL username/databases will be dropped.</p>
+<pre><code>flag=/home/&quot;$FSUID&quot;/.flag_DONOTDELETE
+
+        if [ -e /home/$FSUID/$flag ]
+        then
+</code></pre><p>This <a href="https://gist.github.com/wbollock/c42f68868515362dc2f890628f667fb2">GitHub Gist</a> has more information on the logic I used.</p>
+<p>On a smaller note, I included some text into the above dot file to encourage any curious students to apply for a job - similar to other websites including text in their source code.</p>
+<pre><code>echo &quot;Reading the .dotfiles? You're a curious student. Apply for a job at the CCI HelpDesk and mention this message!&quot; &gt;&gt; $flag
+</code></pre><h3 id="a-quick-note-on-passwords">A Quick Note on Passwords</h3>
+<p>Security was a key objective, and I threw in a little bit of salt to help with the password generation, but it&rsquo;s probably not necessary and be redundant.</p>
+<pre><code>PASSWDDB=$(date +%s | sha256sum | base64 | head -c 12 ; echo)
+</code></pre><h3 id="wrapping-up">Wrapping Up</h3>
+<p>One last thing that may be useful to someone is the systemd unit service to run the above program infinitely.</p>
+<pre><code>[Unit]
+Description=Torch First Login Setup
+
+[Service]
+ExecStart=/&lt;script location&gt;/classweb_login.sh
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+</code></pre><h2 id="how-the-rollout-went">How The Rollout Went</h2>
+<h3 id="user-testing">User Testing</h3>
+<p>Luckily I was enrolled in a Usability Analysis course when performing the initial Torch planning. I realized it may be useful to have some users test the MySQL generation, usability, and login system other than myself.</p>
+<p>Thankfully our HelpDesk technicians performed valuable user testing, letting me know where I was assuming too much, or what parts were easy.</p>
+<pre><code>2) Uploading a website file 
+
+  
+
+Create a file titled &quot;index.html&quot; on your local machine. Type whatever you would like in that, it can be a simple phrase or word.  
+
+Connect to the server with SFTP using the parameters above.  
+
+Do you see a file titled ‘Torch Account Information’? If so, can you open it and read the contents? 
+
+Upload the index.html file with an FTP program, such as FileZilla or CyberDuck, to either, &quot;public_html&quot; in your home directory, or /web/FSUID. Upload your index.html to either spot. 
+
+Using a web browser, go to https://torch.cci.fsu.edu/~FSUID. Did your site load properly, and did you get a lock on the webpage (SSL)? 
+</code></pre><h3 id="scope-creep-and-the-first-day">Scope Creep and the First Day</h3>
+<p>As the semester drew closer and closer, and working with professors on the new system, I was worried. What would happen if two users logged in at the exact same second? What about different versions of MacOS, MySQL Workbench, Putty, Mac Terminal, and Gentoo users?</p>
+<p>At the last second, our scope went up dramatically. We decided to incorporate the bemeoth MySQL-only server into Torch. This made a lot of sense - MySQL 101 students could simply ignore the web development aspects, and have MySQL credentials they could use throughout their degree.</p>
+<p>Then it arrived - the onslaught of logins. Enjoy the photos below:</p>
+<p><img src="../img/torch_registrations.png" alt="torch registrations"></p>
+<p>There was confusion in one class that <em>we</em> provided the login credentials, cue tickets:</p>
+<p><img src="../img/tickets.png" alt="tickets"></p>
+<p>I eventually setup an auto-responder for the sheer amount of tickets that we could not assist with.</p>
+<p>Some commands I didn&rsquo;t expect users to run:</p>
+<pre><code>apt install putty-tools (Obviously, student's don't have sudo access)
+
+/mnt/c/Users/some_student$ ssh some_student@torch.cci.fsu.edu (Copying Windows CMD SSH, and trying to SSH into the server they're already logged into)
+
+cd C:\Users\some_student\Desktop (Self Explanatory)
+
+</code></pre><p>Thankfully we had Graylog setup to easily parse through command history. My point here is not to make fun of students not having a solid grasp on the command line - only to point out that I didn&rsquo;t expect such issues from my testing or thought process. We&rsquo;ve all been there before.</p>
 
 
 
