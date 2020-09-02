@@ -18,8 +18,8 @@
 			<link>https://wboll.dev/blog/post/torch/</link>
 			<pubDate>Tue, 01 Sep 2020 11:42:00 -0400</pubDate>
 			<guid>https://wboll.dev/blog/post/torch/</guid>
-			<description>EStimate: 8 Minute Read
-Forward - What You Can Gain from Reading This If you&amp;rsquo;re a system administrator looking for unique ways to incorporate Linux servers with class curriculums, this article may inspire methodologies for bringing the command line to the student masses.
+			<description>If you&amp;rsquo;re a system administrator looking for unique ways to incorporate Linux servers with class curriculums, this article may inspire methodologies for bringing the command line to the student masses.
+Forward - What You Can Gain from Reading This Estimate: 8 Minute Read
 I asked on reddit&amp;rsquo;s /r/linuxadmin how they handle student-accessible servers. Many ideas were brought up - segmented Docker containers, locked down hosts, restrictive commands. I went with what I know best: a strong dose of Ansible, glorious SSSD, and trusty Bash.</description>
 		</item>
       	
