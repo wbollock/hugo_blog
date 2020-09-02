@@ -85,12 +85,9 @@
 <ul>
 <li><a href="https://gist.github.com/wbollock/c42f68868515362dc2f890628f667fb2">Main script</a> to watch for account creation, create MySQL account, and fire off credentials to student.</li>
 </ul>
-<h1 id="the-problem">The Problem</h1>
-<p>One unfortunate reality I&rsquo;ve discovered, moving from an undergraduate IT student, to System Administrator pursing a Master&rsquo;s in IT, is that not all students share the same love of the Linux command line as I do.</p>
-<p>Most student&rsquo;s view the command line - a requirement for their Intro to MySQL class, or basic web development - as an obtuse, ancient obstacle for submitting their assignments.</p>
-<p>Therefore, we wanted to provide a server (Torch) that will be equally accessible to students that require a GUI for every application, and &ldquo;power user&rdquo; students itching for freedom on a university funded pseudo-VPS.</p>
 <nav id="TableOfContents">
   <ul>
+    <li><a href="#the-problem">The Problem</a></li>
     <li><a href="#exposition">Exposition</a></li>
     <li><a href="#what-we-implemented-uniquely">What We Implemented Uniquely</a>
       <ul>
@@ -108,10 +105,14 @@
       </ul>
     </li>
     <li><a href="#fail2ban-woes">Fail2ban Woes</a></li>
-    <li><a href="#miscellaneous-additions">Miscellaneous Additions</a></li>
+    <li><a href="#miscellaneous-notes">Miscellaneous Notes</a></li>
     <li><a href="#after-action-report---denouement">After Action Report - Denouement</a></li>
   </ul>
-</nav><h2 id="exposition">Exposition</h2>
+</nav><h2 id="the-problem">The Problem</h2>
+<p>One unfortunate reality I&rsquo;ve discovered, moving from an undergraduate IT student, to System Administrator pursing a Master&rsquo;s in IT, is that not all students share the same love of the Linux command line as I do.</p>
+<p>Most student&rsquo;s view the command line - a requirement for their Intro to MySQL class, or basic web development - as an obtuse, ancient obstacle for submitting their assignments.</p>
+<p>Therefore, we wanted to provide a server (Torch) that will be equally accessible to students that require a GUI for every application, and &ldquo;power user&rdquo; students itching for freedom on a university funded pseudo-VPS.</p>
+<h2 id="exposition">Exposition</h2>
 <p>Previously, CCI operated 4 or so hosts, one for each class that required some server space.</p>
 <ul>
 <li>Each instructor created SSH accounts manually for each student - often with credentials shared <strong>class-wide</strong>. Students had no sense of privacy or identity with their Linux accounts.</li>
@@ -207,7 +208,7 @@ cd C:\Users\some_student\Desktop (Self Explanatory)
 <p><img src="../geoip.png" alt="attack origins"></p>
 <p>While these are automated bot attempts, we did have an unfortunate encounter with some malicious Turks a while back. As such, I have strict fail2ban rules, ranging from SSH attempts to amount of 404 GETs. After having multiple students get caught in the filter (allowing ~10 failed SSH attempts, x3&hellip;.) I had to raise our filter limit for this server only.</p>
 <p>Graylog was fantastic for searching individual IPV4 addresses and seeing if students were caught in the net.</p>
-<h2 id="miscellaneous-additions">Miscellaneous Additions</h2>
+<h2 id="miscellaneous-notes">Miscellaneous Notes</h2>
 <p><strong><a href="https://github.com/tldr-pages/tldr">tl;dr</a></strong> - tldr is a &ldquo;Collaborative cheatsheets for console commands&rdquo;, and the only FOSS project I&rsquo;ve been able to contribute to. I hope some students find a good use for it - saves my butt everyday.</p>
 <pre><code>[web15c@torch]~❯ tldr tar
 tar
