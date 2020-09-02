@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-<title>Torch - Command line for the student masses</title>
+<title>Torch - Command Line for the Student Masses</title>
 
 
   
@@ -52,7 +52,7 @@
       <div class="container">
         <div class="post-heading">
           
-            <h1>Torch - Command line for the student masses</h1>
+            <h1>Torch - Command Line for the Student Masses</h1>
           
           
             <span class="meta-post">
@@ -71,9 +71,9 @@
   <div class="container" role="main">
     <article class="article" class="blog-post">
       
-    <p>Remember to spellcheck asswipe</p>
+    <p>EStimate: 8 Minute Read</p>
 <h1 id="forward---what-you-can-gain-from-reading-this">Forward - What You Can Gain from Reading This</h1>
-<p>If you&rsquo;re a system administrator looking for unique ways to incorporate Linux servers with class curriculums, this article may inspire methodologies on bringing the command line to the student masses.</p>
+<p>If you&rsquo;re a system administrator looking for unique ways to incorporate Linux servers with class curriculums, this article may inspire methodologies for bringing the command line to the student masses.</p>
 <p>I asked on reddit&rsquo;s <a href="https://www.reddit.com/r/linuxadmin/">/r/linuxadmin</a> how they handle student-accessible servers. Many ideas were brought up - segmented Docker containers, locked down hosts, restrictive commands. I went with what I know best: a strong dose of Ansible, glorious SSSD, and trusty Bash.</p>
 <p>Links:</p>
 <ul>
@@ -91,10 +91,17 @@
 <li>Advanced students had trouble developing personal projects on hosts without SSL, or permissions for multiple MySQL databases. How would we foster the next Zuckerberg without giving students the tools to experiment?</li>
 </ul>
 <p>Myself and my fellow system administrator wanted to create a sandbox for our students. One singular server to rule them all. A hostname easy to remember, credentials that matched their university experience across all services, and something accessible to students simply wanting to do well in their class and never continue beyond their grade.</p>
-<h2 id="what-we-did-uniquely">What We Did Uniquely</h2>
+<h2 id="what-we-implemented-uniquely">What We Implemented Uniquely</h2>
+<p>Not unique for you syadmin veterans, but a first for our college. Our goal was for students to:</p>
+<ul>
+<li>Be able to quickly upload website files (wildcard SSL cert allows every student to have a nice and pretty lock on their webpages)</li>
+<li>Utilize MySQL for classwork or web development projects</li>
+<li>Have an Agile server that can be torn-down and restored from scratch quickly (everything written in Ansible)</li>
+<li>Continue to use their web server after class is over. No more Wix, Weebly, or Squarespace.</li>
+</ul>
 <h3 id="sso-and-credentials">SSO and Credentials</h3>
 <p>SSO is the shit. No holds barred, SSO is the light at the end of the sysadmin tunnel. Every service we employ, whether it&rsquo;s logging, monitoring, or Ansible automation, needs to have SSO. Besides security benefits, it&rsquo;s just so convenient. Our students did not know such joy, recieving a list of usernames and passwords from instructors they would need to pull up before starting every assignment.</p>
-<p><strong><a href="https://sssd.io/">SSSD</a></strong> was our counter-measure for individualized credentials. My first project as a HelpDesk technician, SSSD allows fine tuning our Linux authentication from /etc/sudoers to SSH access. Despite being on Debian-based systems, SSSD is the core component of our Ansible configuration and delegating access to our systems.</p>
+<p><strong><a href="https://sssd.io/">SSSD</a></strong> was our counter-measure for individualized credentials. My first project as a HelpDesk technician, SSSD allows fine tuning our Linux authentication from /etc/sudoers to SSH access. Despite being on Debian-based systems, SSSD is the core component of our Ansible configuration and delegating access to our systems. We were able to open up the server to every single student enrolled in a relevant course with ease.</p>
 <h3 id="what-about-mysql-credentials">What about MySQL credentials?</h3>
 <p>While it is certainly <em>possible</em> to use PAM in conjunction with MySQL, that was one layer of abstraction too far. I was shaking up class procedures that have been in place for a decade - faculty might not appreciate a complete and total overhaul.</p>
 <p>In comes postfix, and my fellow sysadmin&rsquo;s great web design (he used <a href="https://heml.io/">HEML</a> for creating the HTML email).</p>
@@ -121,8 +128,8 @@ FSUID=$(inotifywait -q -e create /home/ | awk '{ print $NF }')
 
         if [ -e /home/$FSUID/$flag ]
         then
-</code></pre><p>This <a href="https://gist.github.com/wbollock/c42f68868515362dc2f890628f667fb2">GitHub Gist</a> has more information on the logic I used.</p>
-<p>On a smaller note, I included some text into the above dot file to encourage any curious students to apply for a job - similar to other trendy websites including text in their source code.</p>
+</code></pre><p>This <a href="https://gist.github.com/wbollock/c42f68868515362dc2f890628f667fb2">GitHub Gist</a> has the complete script, edited for security.</p>
+<p>On a smaller note, I included some text into the above dot file to encourage any curious students to apply for a job - similar to other trendy websites including job advertisements in their source code.</p>
 <pre><code>echo &quot;Reading the .dotfiles? You're a curious student. Apply for a job at the CCI HelpDesk and mention this message!&quot; &gt;&gt; $flag
 </code></pre><h3 id="a-quick-note-on-passwords">A Quick Note on Passwords</h3>
 <p>Security was a key objective, and I threw in a little bit of salt to help with the password generation, but it&rsquo;s probably not necessary and be redundant.</p>
@@ -172,8 +179,18 @@ Using a web browser, go to https://torch.cci.fsu.edu/~FSUID. Did your site load 
 cd C:\Users\some_student\Desktop (Self Explanatory)
 
 </code></pre><p>Thankfully we had Graylog setup to easily parse through command history. My point here is not to make fun of students not having a solid grasp on the command line - only to point out that I didn&rsquo;t expect such issues from my testing or thought process. We&rsquo;ve all been there before.</p>
+<h2 id="fail2ban-woes">Fail2ban Woes</h2>
+<p>Ever since taking one security class and reading <a href="https://www.amazon.com/Sandworm-Cyberwar-Kremlins-Dangerous-Hackers/dp/0385544405">Sandworm</a>, I&rsquo;ve become much more interested in securing our hosts.</p>
+<p>You can see some of our attack origins here:</p>
+<p><img src="../geoip.png" alt="attack origins"></p>
+<p>While these are automated bot attempts, we did have an unfortunate encounter with some malicious Turks a while back. As such, I have strict fail2ban rules, ranging from SSH attempts to amount of 404 GETs. After having multiple students get caught in the filter (allowing ~10 failed SSH attempts, x3&hellip;.) I had to raise our filter limit for this server only.</p>
+<p>Graylog was fantastic for searching individual IPV4 addresses and seeing if students were caught in the net.</p>
 <h2 id="after-action-report">After Action Report</h2>
 <p>All in all, my first major project for the general public (students in my university&rsquo;s college) went well. We had around 125 accounts created, and maybe 20 tickets created needing help. ~16% of students having issues is not a good metric. However, with better understanding for faculty, and much improved help resources on the main domain, this should be easier every semester to come.</p>
+<p>Some important goals I have for the future:</p>
+<ul>
+<li>Monitoring /home/ folder size</li>
+</ul>
 
 
 
