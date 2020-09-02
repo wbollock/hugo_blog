@@ -108,6 +108,7 @@
       </ul>
     </li>
     <li><a href="#fail2ban-woes">Fail2ban Woes</a></li>
+    <li><a href="#miscellaneous-additions">Miscellaneous Additions</a></li>
     <li><a href="#after-action-report---denouement">After Action Report - Denouement</a></li>
   </ul>
 </nav><h2 id="exposition">Exposition</h2>
@@ -206,6 +207,33 @@ cd C:\Users\some_student\Desktop (Self Explanatory)
 <p><img src="../geoip.png" alt="attack origins"></p>
 <p>While these are automated bot attempts, we did have an unfortunate encounter with some malicious Turks a while back. As such, I have strict fail2ban rules, ranging from SSH attempts to amount of 404 GETs. After having multiple students get caught in the filter (allowing ~10 failed SSH attempts, x3&hellip;.) I had to raise our filter limit for this server only.</p>
 <p>Graylog was fantastic for searching individual IPV4 addresses and seeing if students were caught in the net.</p>
+<h2 id="miscellaneous-additions">Miscellaneous Additions</h2>
+<p><strong><a href="https://github.com/tldr-pages/tldr">tl;dr</a></strong> - tldr is a &ldquo;Collaborative cheatsheets for console commands&rdquo;, and the only FOSS project I&rsquo;ve been able to contribute to. I hope some students find a good use for it - saves my butt everyday.</p>
+<pre><code>[web15c@torch]~❯ tldr tar
+tar
+
+Archiving utility.
+Often combined with a compression method, such as gzip or bzip.
+More information: &lt;https://www.gnu.org/software/tar&gt;.
+
+- Create an archive from files:
+  tar cf target.tar file1 file2 file3
+
+- Create a gzipped archive:
+  tar czf target.tar.gz file1 file2 file3
+
+- Create a gzipped archive from a directory using relative paths:
+  tar czf target.tar.gz -C path/to/directory .
+
+- Extract a (compressed) archive into the current directory:
+  tar xf source.tar[.gz|.bz2|.xz]
+
+- Extract a (compressed) archive into the target directory:
+  tar xf source.tar[.gz|.bz2|.xz] -C directory
+</code></pre><p>Don&rsquo;t skimp on the web development - my attempt at the HTML email versus my coworker&rsquo;s attempt:</p>
+<p><img src="../email_compare.png" alt="email comparison"></p>
+<p>And one of the webpages (basic template HTML5UP):</p>
+<p><img src="../website_compare.png" alt="email comparison"></p>
 <h2 id="after-action-report---denouement">After Action Report - Denouement</h2>
 <p>All in all, my first major project for the general public (students in my university&rsquo;s college) went well. We had around 125 accounts created, and maybe 20 tickets created needing help. ~16% of students having issues is not a good metric. However, with better understanding for faculty, and much improved help resources on the main domain, this should be easier every semester to come.</p>
 <p>Some important goals I have for the future:</p>
