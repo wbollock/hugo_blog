@@ -70,9 +70,8 @@
     
   <div class="container" role="main">
     <article class="article" class="blog-post">
-      
-    <p>If you&rsquo;re a system administrator looking for unique ways to incorporate Linux servers with class curriculums, this article may inspire methodologies for bringing the command line to the student masses.</p>
-<h2 id="forward---what-you-can-gain-from-reading-this">Forward - What You Can Gain from Reading This</h2>
+      <p>If you&rsquo;re a system administrator looking for unique ways to incorporate Linux servers with class curriculums, this article may inspire methodologies for bringing the command line to the student masses.</p>
+<h1 id="forward---what-you-can-gain-from-reading-this">Forward - What You Can Gain from Reading This</h1>
 <p>Estimate: 8 Minute Read</p>
 <p>I asked on reddit&rsquo;s <a href="https://www.reddit.com/r/linuxadmin/">/r/linuxadmin</a> how they handle student-accessible servers. Many ideas were brought up - segmented Docker containers, locked down hosts, restrictive commands. I went with what I know best: a strong dose of Ansible, glorious SSSD, and trusty Bash.</p>
 <p>Our goal was for students to:</p>
@@ -90,7 +89,28 @@
 <p>One unfortunate reality I&rsquo;ve discovered, moving from an undergraduate IT student, to System Administrator pursing a Master&rsquo;s in IT, is that not all students share the same love of the Linux command line as I do.</p>
 <p>Most student&rsquo;s view the command line - a requirement for their Intro to MySQL class, or basic web development - as an obtuse, ancient obstacle for submitting their assignments.</p>
 <p>Therefore, we wanted to provide a server (Torch) that will be equally accessible to students that require a GUI for every application, and &ldquo;power user&rdquo; students itching for freedom on a university funded pseudo-VPS.</p>
-<h2 id="exposition">Exposition</h2>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#exposition">Exposition</a></li>
+    <li><a href="#what-we-implemented-uniquely">What We Implemented Uniquely</a>
+      <ul>
+        <li><a href="#sso-and-credentials">SSO and Credentials</a></li>
+        <li><a href="#what-about-mysql-credentials">What about MySQL credentials?</a></li>
+        <li><a href="#solving-the-sftp-problem">Solving the SFTP problem</a></li>
+        <li><a href="#a-quick-note-on-passwords">A Quick Note on Passwords</a></li>
+        <li><a href="#wrapping-up">Wrapping Up</a></li>
+      </ul>
+    </li>
+    <li><a href="#how-the-rollout-went---climax">How The Rollout Went - Climax</a>
+      <ul>
+        <li><a href="#user-testing">User Testing</a></li>
+        <li><a href="#scope-creep-and-the-first-day">Scope Creep and the First Day</a></li>
+      </ul>
+    </li>
+    <li><a href="#fail2ban-woes">Fail2ban Woes</a></li>
+    <li><a href="#after-action-report---denouement">After Action Report - Denouement</a></li>
+  </ul>
+</nav><h2 id="exposition">Exposition</h2>
 <p>Previously, CCI operated 4 or so hosts, one for each class that required some server space.</p>
 <ul>
 <li>Each instructor created SSH accounts manually for each student - often with credentials shared <strong>class-wide</strong>. Students had no sense of privacy or identity with their Linux accounts.</li>
@@ -196,9 +216,38 @@ cd C:\Users\some_student\Desktop (Self Explanatory)
 </ul>
 
 
-
+      
+        <div class="blog-tags">
+          
+            <a href="https://wboll.dev/blog//tags/linux/">linux</a>&nbsp;
+          
+            <a href="https://wboll.dev/blog//tags/bash/">bash</a>&nbsp;
+          
+            <a href="https://wboll.dev/blog//tags/rollout/">rollout</a>&nbsp;
+          
+        </div>
       
     </article>
+    
+      <script>
+    document.addEventListener('scroll', function() {
+        if (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) {
+            document.getElementById('backtotopButton').style.opacity = "1";
+            document.getElementById('backtotopButton').style.transition = "0.5s";
+        } else {
+            document.getElementById('backtotopButton').style.opacity = "0";
+            document.getElementById('backtotopButton').style.transition = "0.5s";
+        }
+    });
+
+    function topFunction() {
+        document.body.scrollTop = 0;            
+        document.documentElement.scrollTop = 0; 
+    }
+</script>
+      <button onclick="topFunction()" id="backtotopButton">
+        <i class="fa fa-angle-up"></i>
+      </button>
     
     
       
