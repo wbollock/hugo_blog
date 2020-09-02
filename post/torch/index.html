@@ -71,6 +71,7 @@
   <div class="container" role="main">
     <article class="article" class="blog-post">
       <p>If you&rsquo;re a system administrator looking for unique ways to incorporate Linux servers with class curriculums, this article may inspire methodologies for bringing the command line to the student masses.</p>
+<p>Estimate: 10 Minute Read</p>
 <h1 id="table-of-contents">Table of Contents</h1>
 <nav id="TableOfContents">
   <ul>
@@ -83,10 +84,10 @@
         <li><a href="#what-about-mysql-credentials">What about MySQL credentials?</a></li>
         <li><a href="#solving-the-sftp-problem">Solving the SFTP problem</a></li>
         <li><a href="#a-quick-note-on-passwords">A Quick Note on Passwords</a></li>
-        <li><a href="#wrapping-up">Wrapping Up</a></li>
+        <li><a href="#systemd---small-note">Systemd - Small Note</a></li>
       </ul>
     </li>
-    <li><a href="#how-the-rollout-went---climax">How The Rollout Went - Climax</a>
+    <li><a href="#how-the-rollout-went">How The Rollout Went</a>
       <ul>
         <li><a href="#user-testing">User Testing</a></li>
         <li><a href="#scope-creep-and-the-first-day">Scope Creep and the First Day</a></li>
@@ -97,13 +98,12 @@
     <li><a href="#after-action-report---denouement">After Action Report - Denouement</a></li>
   </ul>
 </nav><h2 id="forward---what-you-can-gain-from-reading-this">Forward - What You Can Gain from Reading This</h2>
-<p>Estimate: 8 Minute Read</p>
 <p>I asked on reddit&rsquo;s <a href="https://www.reddit.com/r/linuxadmin/">/r/linuxadmin</a> how they handle student-accessible servers. Many ideas were brought up - segmented Docker containers, locked down hosts, restrictive commands. I went with what I know best: a strong dose of Ansible, glorious SSSD, and trusty Bash.</p>
 <p>Our goal was for students to:</p>
 <ul>
-<li>Be able to quickly upload website files (wildcard SSL cert allows every student to have a nice and pretty lock on their webpages)</li>
-<li>Utilize MySQL for classwork or web development projects</li>
-<li>Have an Agile server that can be torn-down and restored from scratch quickly (everything written in Ansible)</li>
+<li>Be able to quickly upload website files (wildcard SSL cert allows every student to have a nice and pretty lock on their webpages).</li>
+<li>Utilize MySQL for classwork or web development projects.</li>
+<li>Have an Agile server that can be torn-down and restored from scratch quickly (everything written in Ansible).</li>
 <li>Continue to use their web server after class is over. No more Wix, Weebly, or Squarespace.</li>
 </ul>
 <p>Links:</p>
@@ -138,7 +138,16 @@
 <li><strong>SFTP</strong></li>
 <li>MySQL Workbench</li>
 </ol>
-<h3 id="solving-the-sftp-problem">Solving the SFTP problem</h3>
+<pre><code># insert credentials into email
+sed -i &quot;s/FSUID/$FSUID/g&quot; /home/$FSUID/torch-template.html
+sed -i &quot;s/PASSWDDB/$PASSWDDB/g&quot; /home/$FSUID/torch-template.html
+
+# email to students
+cat /home/$FSUID/torch-template.html | mail -s &quot;Welcome to torch.cci.fsu.edu $FSUID!&quot; -a &quot;From: XXXXX@cci.fsu.edu&quot; $FSUID@my.fsu.edu --content-type=text/html
+
+# and email to HelpDesk for recovery or email trouble
+cat /home/$FSUID/torch-template.html | mail -s &quot;Welcome to torch.cci.fsu.edu $FSUID!&quot; -a &quot;From: XXXXX@cci.fsu.edu&quot; &lt;insert service desk email&gt; --content-type=text/html
+</code></pre><h3 id="solving-the-sftp-problem">Solving the SFTP problem</h3>
 <p>Back to the main problem we were solving, making the host accessible for students regardless of initial skill level, we had to not only trigger our MySQL account creation on traditional SSH (also accounts for MySQL Workbench), but for SFTP through FileZilla, Transmit, etc.</p>
 <p>This was tough. Conventional methods of taking action upon first time account creation didn&rsquo;t work well - /etc/profile.d, /etc/skel, etc. all failed the SFTP litmus test.</p>
 <p>In comes <strong><a href="https://linux.die.net/man/1/inotifywatch">inotifywatch</a></strong>. A beautiful utility that helps monitor directories for changes. The one assumption I had about SSH and SFTP was that a new folder in /home/ would be created with the user&rsquo;s username.</p>
@@ -159,7 +168,7 @@ FSUID=$(inotifywait -q -e create /home/ | awk '{ print $NF }')
 </code></pre><h3 id="a-quick-note-on-passwords">A Quick Note on Passwords</h3>
 <p>Security was a key objective, and I threw in a little bit of salt to help with the password generation, but it&rsquo;s probably not necessary and be redundant.</p>
 <pre><code>PASSWDDB=$(date +%s | sha256sum | base64 | head -c 12 ; echo)
-</code></pre><h3 id="wrapping-up">Wrapping Up</h3>
+</code></pre><h3 id="systemd---small-note">Systemd - Small Note</h3>
 <p>One last thing that may be useful to someone is the systemd unit service to run the above program infinitely.</p>
 <pre><code>[Unit]
 Description=Torch First Login Setup
@@ -171,7 +180,7 @@ Group=root
 
 [Install]
 WantedBy=multi-user.target
-</code></pre><h2 id="how-the-rollout-went---climax">How The Rollout Went - Climax</h2>
+</code></pre><h2 id="how-the-rollout-went">How The Rollout Went</h2>
 <h3 id="user-testing">User Testing</h3>
 <p>Luckily I was enrolled in a Usability Analysis course when performing the initial Torch planning. I realized it may be useful to have some users test the MySQL generation, usability, and login system other than myself.</p>
 <p>Thankfully our HelpDesk technicians performed valuable user testing, letting me know where I was assuming too much, or what parts were easy.</p>
@@ -244,6 +253,7 @@ More information: &lt;https://www.gnu.org/software/tar&gt;.
 <li>Monitoring /home/ folder size, not just until server&rsquo;s disk space</li>
 <li>Better usability analysis of student pain points, and finding solutions</li>
 <li>Continuing to adjust the server configuration to match course requirements and satisfy faculty</li>
+<li>One edge-case I couldn&rsquo;t solve for is users logging in without the student email suffix (@my.fsu.edu) - may do some AD lookups to remedy this</li>
 </ul>
 
 
