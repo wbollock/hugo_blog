@@ -153,9 +153,9 @@
 <ol>
 <li>SSH</li>
 <li><strong>SFTP</strong></li>
-<li>MySQL Workbench
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#e6db74">```</span>
-<span style="color:#75715e"># insert credentials into email</span>
+<li>MySQL Workbench</li>
+</ol>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># insert credentials into email</span>
 sed -i <span style="color:#e6db74">&#34;s/FSUID/</span>$FSUID<span style="color:#e6db74">/g&#34;</span> /home/$FSUID/torch-template.html
 sed -i <span style="color:#e6db74">&#34;s/PASSWDDB/</span>$PASSWDDB<span style="color:#e6db74">/g&#34;</span> /home/$FSUID/torch-template.html
 
@@ -163,9 +163,7 @@ sed -i <span style="color:#e6db74">&#34;s/PASSWDDB/</span>$PASSWDDB<span style="
 cat /home/$FSUID/torch-template.html | mail -s <span style="color:#e6db74">&#34;Welcome to torch.cci.fsu.edu </span>$FSUID<span style="color:#e6db74">!&#34;</span> -a <span style="color:#e6db74">&#34;From: XXXXX@cci.fsu.edu&#34;</span> $FSUID@my.fsu.edu --content-type<span style="color:#f92672">=</span>text/html
 
 <span style="color:#75715e"># and email to HelpDesk for recovery or email trouble</span>
-cat /home/$FSUID/torch-template.html | mail -s <span style="color:#e6db74">&#34;Welcome to torch.cci.fsu.edu </span>$FSUID<span style="color:#e6db74">!&#34;</span> -a <span style="color:#e6db74">&#34;From: XXXXX@cci.fsu.edu&#34;</span> &lt;insert service desk email&gt; --content-type<span style="color:#f92672">=</span>text/html
-<span style="color:#e6db74">```</span></code></pre></div></li>
-</ol>
+cat /home/$FSUID/torch-template.html | mail -s <span style="color:#e6db74">&#34;Welcome to torch.cci.fsu.edu </span>$FSUID<span style="color:#e6db74">!&#34;</span> -a <span style="color:#e6db74">&#34;From: XXXXX@cci.fsu.edu&#34;</span> &lt;insert service desk email&gt; --content-type<span style="color:#f92672">=</span>text/html</code></pre></div>
 <h3 id="solving-the-sftp-problem">Solving the SFTP problem</h3>
 <p>Back to the main problem we were solving, making the host accessible for students regardless of initial skill level, we had to not only trigger our MySQL account creation on traditional SSH (also accounts for MySQL Workbench), but for SFTP through FileZilla, Transmit, etc.</p>
 <p>This was tough. Conventional methods of taking action upon first time account creation didn&rsquo;t work well - /etc/profile.d, /etc/skel, etc. all failed the SFTP litmus test.</p>
