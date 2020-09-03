@@ -167,32 +167,24 @@ cat /home/$FSUID/torch-template.html | mail -s <span style="color:#e6db74">&#34;
 <h3 id="solving-the-sftp-problem">Solving the SFTP problem</h3>
 <p>Back to the main problem we were solving, making the host accessible for students regardless of initial skill level, we had to not only trigger our MySQL account creation on traditional SSH (also accounts for MySQL Workbench), but for SFTP through FileZilla, Transmit, etc.</p>
 <p>This was tough. Conventional methods of taking action upon first time account creation didn&rsquo;t work well - /etc/profile.d, /etc/skel, etc. all failed the SFTP litmus test.</p>
-<p>In comes <strong><a href="https://linux.die.net/man/1/inotifywatch">inotifywatch</a></strong>. A beautiful utility that helps monitor directories for changes. The one assumption I had about SSH and SFTP was that a new folder in /home/ would be created with the user&rsquo;s username.
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#e6db74">```</span>
-<span style="color:#75715e"># infinite loop</span>
+<p>In comes <strong><a href="https://linux.die.net/man/1/inotifywatch">inotifywatch</a></strong>. A beautiful utility that helps monitor directories for changes. The one assumption I had about SSH and SFTP was that a new folder in /home/ would be created with the user&rsquo;s username.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># infinite loop</span>
 <span style="color:#66d9ef">while</span> true
 <span style="color:#66d9ef">do</span>
 
 <span style="color:#75715e"># upon new /home/ directory creation, spit out the username to $FSUID</span>
-FSUID<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>inotifywait -q -e create /home/ | awk <span style="color:#e6db74">&#39;{ print $NF }&#39;</span><span style="color:#66d9ef">)</span>
-<span style="color:#e6db74">```</span></code></pre></div></p>
+FSUID<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>inotifywait -q -e create /home/ | awk <span style="color:#e6db74">&#39;{ print $NF }&#39;</span><span style="color:#66d9ef">)</span></code></pre></div>
 <p>Then check to see if the user already has an account - if not, their MySQL username/databases will be dropped.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#e6db74">```</span>
-flag<span style="color:#f92672">=</span>/home/<span style="color:#e6db74">&#34;</span>$FSUID<span style="color:#e6db74">&#34;</span>/.flag_DONOTDELETE
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">flag<span style="color:#f92672">=</span>/home/<span style="color:#e6db74">&#34;</span>$FSUID<span style="color:#e6db74">&#34;</span>/.flag_DONOTDELETE
 
         <span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -e /home/$FSUID/$flag <span style="color:#f92672">]</span>
-        <span style="color:#66d9ef">then</span>
-<span style="color:#e6db74">```</span></code></pre></div>
+        <span style="color:#66d9ef">then</span></code></pre></div>
 <p>This <a href="https://gist.github.com/wbollock/c42f68868515362dc2f890628f667fb2">GitHub Gist</a> has the complete script, edited for security.</p>
 <p>On a smaller note, I included some text into the above dot file to encourage any curious students to apply for a job - similar to other trendy websites including job advertisements in their source code.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#e6db74">```</span>
-echo <span style="color:#e6db74">&#34;Reading the .dotfiles? You&#39;re a curious student. Apply for a job at the CCI HelpDesk and mention this message!&#34;</span> &gt;&gt; $flag
-<span style="color:#e6db74">```</span></code></pre></div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">echo <span style="color:#e6db74">&#34;Reading the .dotfiles? You&#39;re a curious student. Apply for a job at the CCI HelpDesk and mention this message!&#34;</span> &gt;&gt; $flag</code></pre></div>
 <h3 id="a-quick-note-on-passwords">A Quick Note on Passwords</h3>
 <p>Security was a key objective, and I threw in a little bit of salt to help with the password generation, but it&rsquo;s probably not necessary and be redundant.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#e6db74">```</span>
-PASSWDDB<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>date +%s | sha256sum | base64 | head -c <span style="color:#ae81ff">12</span> ; echo<span style="color:#66d9ef">)</span>
-<span style="color:#e6db74">```</span></code></pre></div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">PASSWDDB<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>date +%s | sha256sum | base64 | head -c <span style="color:#ae81ff">12</span> ; echo<span style="color:#66d9ef">)</span></code></pre></div>
 <h3 id="systemd---small-note">Systemd - Small Note</h3>
 <p>One last thing that may be useful to someone is the systemd unit service to run the above program infinitely.</p>
 <pre><code>[Unit]
