@@ -120,7 +120,7 @@
 <ul>
 <li>Be able to quickly upload website files (wildcard SSL cert allows every student to have a nice and pretty lock on their webpages).</li>
 <li>Utilize MySQL for classwork or web development projects.</li>
-<li>Have an Agile server that can be torn-down and restored from scratch quickly (everything written in Ansible).</li>
+<li>Have an agile server that can be torn-down and restored from scratch quickly (*all() configuration through Ansible).</li>
 <li>Continue to use their web server after class is over. No more Wix, Weebly, or Squarespace.</li>
 </ul>
 <p>Links:</p>
@@ -132,21 +132,21 @@
 <p>Most student&rsquo;s view the command line - a requirement for their Intro to MySQL class, or basic web development - as an obtuse, ancient obstacle for submitting their assignments.</p>
 <p>Therefore, we wanted to provide a server (Torch) that will be equally accessible to students that require a GUI for every application, and &ldquo;power user&rdquo; students itching for freedom on a university funded pseudo-VPS.</p>
 <h2 id="exposition">Exposition</h2>
-<p>Previously, CCI operated 4 or so hosts, one for each class that required some server space.</p>
+<p>Previously, <a href="https://cci.fsu.edu">CCI</a> (my org) operated 4 or so hosts, one for each class that required some server space.</p>
 <ul>
 <li>Each instructor created SSH accounts manually for each student - often with credentials shared <strong>class-wide</strong>. Students had no sense of privacy or identity with their Linux accounts.</li>
 <li>After class was over, students lost connection with their account. No way would they continue to use, or could use, accounts spanning across servers named by their course code (LIS1234, LIS4321, LIS5666, etc.)</li>
 <li>Advanced students had trouble developing personal projects on hosts without SSL, or permissions for multiple MySQL databases. How would we foster the next Zuckerberg without giving students the tools to experiment?</li>
 </ul>
-<p>Myself and my fellow system administrator wanted to create a sandbox for our students. One singular server to rule them all. A hostname easy to remember, credentials that matched their university experience across all services, and something accessible to students simply wanting to do well in their class and never continue beyond their grade.</p>
+<p>Myself and my fellow system administrator wanted to create a sandbox for our students. One singular server to rule them all. A hostname easy to remember, credentials that matched their university experience across all services, and something accessible to students simply trying to get good grades or students pursuing programming projects.</p>
 <h2 id="what-we-implemented-uniquely">What We Implemented Uniquely</h2>
 <p>Not unique for you syadmin veterans, but a first for our college.</p>
 <h3 id="sso-and-credentials">SSO and Credentials</h3>
-<p>SSO is the shit. No holds barred, SSO is the light at the end of the sysadmin tunnel. Every service we employ, whether it&rsquo;s logging, monitoring, or Ansible automation, needs to have SSO. Besides security benefits, it&rsquo;s just so convenient. Our students did not know such joy, recieving a list of usernames and passwords from instructors they would need to pull up before starting every assignment.</p>
+<p>SSO is obviously fantastic. No holds barred, SSO is the light at the end of the sysadmin tunnel. Every service we employ, whether it&rsquo;s logging, monitoring, or Ansible automation, needs to have SSO. Besides security benefits, it&rsquo;s just so convenient. Our students did not know such joy, recieving a list of usernames and passwords from instructors they would need to pull up before starting every assignment.</p>
 <p><strong><a href="https://sssd.io/">SSSD</a></strong> was our counter-measure for individualized credentials. My first project as a HelpDesk technician, SSSD allows fine tuning our Linux authentication from /etc/sudoers to SSH access. Despite being on Debian-based systems, SSSD is the core component of our Ansible configuration and delegating access to our systems. We were able to open up the server to every single student enrolled in a relevant course with ease.</p>
 <h3 id="what-about-mysql-credentials">What about MySQL credentials?</h3>
-<p>While it is certainly <em>possible</em> to use PAM in conjunction with MySQL, that was one layer of abstraction too far. I was shaking up class procedures that have been in place for a decade - faculty might not appreciate a complete and total overhaul.</p>
-<p>In comes postfix, and my fellow sysadmin&rsquo;s great web design (he used <a href="https://heml.io/">HEML</a> for creating the HTML email).</p>
+<p>While it is certainly <em>possible</em> to use PAM in conjunction with MySQL to get SSSD logins, that was one layer of abstraction too far. I was shaking up class procedures that have been in place for a decade - faculty might not appreciate a complete and total overhaul.</p>
+<p>In comes postfix, and my fellow sysadmin&rsquo;s great web design (he used <a href="https://heml.io/">HEML</a> for creating the HTML email). This email is automatically sent as soon as a student connects to Torch.</p>
 <p><img src="../torch_email.png" alt="Torch Email"></p>
 <p>As you can see here, we are in-tune with the youth of today, adding emojis. The MySQL password is randomized with a little salt shaken on top.</p>
 <p><strong>The important part</strong>: Students receive this email at their student address on their first connection, regardless of connection type:</p>
@@ -183,7 +183,7 @@ FSUID<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>in
 <p>On a smaller note, I included some text into the above dot file to encourage any curious students to apply for a job - similar to other trendy websites including job advertisements in their source code.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">echo <span style="color:#e6db74">&#34;Reading the .dotfiles? You&#39;re a curious student. Apply for a job at the CCI HelpDesk and mention this message!&#34;</span> &gt;&gt; $flag</code></pre></div>
 <h3 id="a-quick-note-on-passwords">A Quick Note on Passwords</h3>
-<p>Security was a key objective, and I threw in a little bit of salt to help with the password generation, but it&rsquo;s probably not necessary and be redundant.</p>
+<p>Security was a key objective, and I threw in a little bit of salt to help with the password generation, but it&rsquo;s probably not necessary and a little redundant.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">PASSWDDB<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>date +%s | sha256sum | base64 | head -c <span style="color:#ae81ff">12</span> ; echo<span style="color:#66d9ef">)</span></code></pre></div>
 <h3 id="systemd---small-note">Systemd - Small Note</h3>
 <p>One last thing that may be useful to someone is the systemd unit service to run the above program infinitely.</p>
@@ -200,7 +200,8 @@ WantedBy=multi-user.target
 </code></pre><h2 id="how-the-rollout-went">How The Rollout Went</h2>
 <h3 id="user-testing">User Testing</h3>
 <p>Luckily I was enrolled in a Usability Analysis course when performing the initial Torch planning. I realized it may be useful to have some users test the MySQL generation, usability, and login system other than myself.</p>
-<p>Thankfully our HelpDesk technicians performed valuable user testing, letting me know where I was assuming too much, or what parts were easy.</p>
+<p>Our HelpDesk technicians performed valuable user testing, letting me know where I was assuming too much, or what parts were easy.</p>
+<p>Example of testing tasks:</p>
 <pre><code>2) Uploading a website file 
 
   
@@ -235,9 +236,9 @@ cd C:\Users\some_student\Desktop (Self Explanatory)
 <p>You can see some of our attack origins here:</p>
 <p><img src="../geoip.png" alt="attack origins"></p>
 <p>While these are automated bot attempts, we did have an unfortunate encounter with some malicious Turks a while back. As such, I have strict fail2ban rules, ranging from SSH attempts to amount of 404 GETs. After having multiple students get caught in the filter (allowing ~10 failed SSH attempts, x3&hellip;.) I had to raise our filter limit for this server only.</p>
-<p>Graylog was fantastic for searching individual IPV4 addresses and seeing if students were caught in the net.</p>
+<p>Graylog was fantastic for searching individual IPV4 addresses and seeing if students were caught in the fail2ban net.</p>
 <h2 id="miscellaneous-notes">Miscellaneous Notes</h2>
-<p><strong><a href="https://github.com/tldr-pages/tldr">tl;dr</a></strong> - tldr is a &ldquo;Collaborative cheatsheets for console commands&rdquo;, and the only FOSS project I&rsquo;ve been able to contribute to. I hope some students find a good use for it - saves my butt everyday.</p>
+<p><strong><a href="https://github.com/tldr-pages/tldr">tl;dr</a></strong> - tldr is a &ldquo;Collaborative cheatsheets for console commands&rdquo;, and the only FOSS project I&rsquo;ve been able to contribute to. I hope some students find a good use for it - I use it everyday. I advertise it&rsquo;s existence on the torch.cci.fsu.edu homepage.</p>
 <pre><code>[web15c@torch]~❯ tldr tar
 tar
 
@@ -267,10 +268,10 @@ More information: &lt;https://www.gnu.org/software/tar&gt;.
 <p>All in all, my first major project for the general public (students in my university&rsquo;s college) went well. We had around 125 accounts created, and maybe 20 tickets created needing help. ~16% of students having issues is not a good metric. However, with better understanding for faculty, and much improved help resources on the main domain, this should be easier every semester to come.</p>
 <p>Some important goals I have for the future:</p>
 <ul>
-<li>Monitoring /home/ folder size, not just until server&rsquo;s disk space</li>
-<li>Better usability analysis of student pain points, and finding solutions</li>
-<li>Continuing to adjust the server configuration to match course requirements and satisfy faculty</li>
-<li>One edge-case I couldn&rsquo;t solve for is users logging in without the student email suffix (@my.fsu.edu) - may do some AD lookups to remedy this</li>
+<li>Monitoring /home/ folder size, not just the server&rsquo;s disk space remaining.</li>
+<li>Better usability analysis of student pain points, and finding solutions.</li>
+<li>Continuing to adjust the server configuration to match course requirements and satisfy faculty (automated grading scripts?).</li>
+<li>One edge-case I couldn&rsquo;t solve for is users logging in without the student email suffix (@my.fsu.edu) - may do some AD lookups to remedy this.</li>
 </ul>
 
       
