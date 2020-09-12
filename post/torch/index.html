@@ -140,7 +140,7 @@
 </ul>
 <p>Myself and my fellow system administrator wanted to create a sandbox for our students. One singular server to rule them all. A hostname easy to remember, credentials that matched their university experience across all services, and something accessible to students simply trying to get good grades or students pursuing programming projects.</p>
 <h2 id="what-we-implemented-uniquely">What We Implemented Uniquely</h2>
-<p>Not unique for you syadmin veterans, but a first for our college.</p>
+<p>Not unique for you sysadmin veterans, but a first for our college.</p>
 <h3 id="sso-and-credentials">SSO and Credentials</h3>
 <p>SSO is obviously fantastic. No holds barred, SSO is the light at the end of the sysadmin tunnel. Every service we employ, whether it&rsquo;s logging, monitoring, or Ansible automation, needs to have SSO. Besides security benefits, it&rsquo;s just so convenient. Our students did not know such joy, recieving a list of usernames and passwords from instructors they would need to pull up before starting every assignment.</p>
 <p><strong><a href="https://sssd.io/">SSSD</a></strong> was our counter-measure for individualized credentials. My first project as a HelpDesk technician, SSSD allows fine tuning our Linux authentication from /etc/sudoers to SSH access. Despite being on Debian-based systems, SSSD is the core component of our Ansible configuration and delegating access to our systems. We were able to open up the server to every single student enrolled in a relevant course with ease.</p>
@@ -238,7 +238,7 @@ cd C:\Users\some_student\Desktop (Self Explanatory)
 <p>While these are automated bot attempts, we did have an unfortunate encounter with some malicious Turks a while back. As such, I have strict fail2ban rules, ranging from SSH attempts to amount of 404 GETs. After having multiple students get caught in the filter (allowing ~10 failed SSH attempts, x3&hellip;.) I had to raise our filter limit for this server only.</p>
 <p>Graylog was fantastic for searching individual IPV4 addresses and seeing if students were caught in the fail2ban net.</p>
 <h2 id="miscellaneous-notes">Miscellaneous Notes</h2>
-<p><strong><a href="https://github.com/tldr-pages/tldr">tl;dr</a></strong> - tldr is a &ldquo;Collaborative cheatsheets for console commands&rdquo;, and the only FOSS project I&rsquo;ve been able to contribute to. I hope some students find a good use for it - I use it everyday. I advertise it&rsquo;s existence on the torch.cci.fsu.edu homepage.</p>
+<p><strong><a href="https://github.com/tldr-pages/tldr">tl;dr</a></strong> - tldr is a &ldquo;Collaborative cheatsheets for console commands&rdquo;, and the only FOSS project I&rsquo;ve been able to contribute to. I hope some students find a good use for it - I use it everyday. I advertise its existence on the torch.cci.fsu.edu homepage.</p>
 <pre><code>[web15c@torch]~❯ tldr tar
 tar
 
