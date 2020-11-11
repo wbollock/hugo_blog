@@ -9,10 +9,18 @@
 		
 		<managingEditor>Page(&#34;Will Bollock&#39;s Blog&#34;) (Will Bollock)</managingEditor>
     	
-  		<lastBuildDate>Tue, 01 Sep 2020 11:42:00 -0400</lastBuildDate>
+  		<lastBuildDate>Wed, 11 Nov 2020 15:48:55 -0500</lastBuildDate>
 		
 		<atom:link href="/blog/" rel="self" type="application/rss+xml" />
 		
+		<item>
+			<title>Awsccp</title>
+			<link>https://wboll.dev/blog/post/awsccp/awsccp/</link>
+			<pubDate>Wed, 11 Nov 2020 15:48:55 -0500</pubDate>
+			<guid>https://wboll.dev/blog/post/awsccp/awsccp/</guid>
+			<description></description>
+		</item>
+      	
 		<item>
 			<title>Torch - Command Line for the Student Masses</title>
 			<link>https://wboll.dev/blog/post/torch/torch/</link>

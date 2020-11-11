@@ -3,6 +3,21 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://wboll.dev/blog/post/awsccp/awsccp/</loc>
+    <lastmod>2020-11-11T15:48:55-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://wboll.dev/blog/post/</loc>
+    <lastmod>2020-11-11T15:48:55-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://wboll.dev/blog/</loc>
+    <lastmod>2020-11-11T15:48:55-05:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://wboll.dev/blog/tags/bash/</loc>
     <lastmod>2020-09-01T11:42:00-04:00</lastmod>
   </url>
@@ -13,22 +28,12 @@
   </url>
   
   <url>
-    <loc>https://wboll.dev/blog/post/</loc>
-    <lastmod>2020-09-01T11:42:00-04:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://wboll.dev/blog/tags/</loc>
     <lastmod>2020-09-01T11:42:00-04:00</lastmod>
   </url>
   
   <url>
     <loc>https://wboll.dev/blog/post/torch/torch/</loc>
-    <lastmod>2020-09-01T11:42:00-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://wboll.dev/blog/</loc>
     <lastmod>2020-09-01T11:42:00-04:00</lastmod>
   </url>
   

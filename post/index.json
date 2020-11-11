@@ -2,6 +2,16 @@
     
         
             {
+                "ref": "https://wboll.dev/blog/post/awsccp/awsccp/",
+                "title": "Awsccp",
+                "section": "post",
+                "date" : "2020.11.11",
+                "body": ""
+            }
+        
+    ,
+        
+            {
                 "ref": "https://wboll.dev/blog/post/torch/torch/",
                 "title": "Torch - Command Line for the Student Masses",
                 "section": "post",
