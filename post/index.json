@@ -3,10 +3,10 @@
         
             {
                 "ref": "https://wboll.dev/blog/post/awsccp/awsccp/",
-                "title": "Awsccp",
+                "title": "AWS Certified Cloud Practitioner",
                 "section": "post",
-                "date" : "2020.11.11",
-                "body": ""
+                "date" : "2020.09.01",
+                "body": "Recently passed the AWS CCP exam after one week of studying. There are many guides like this on the Internet, but nevertheless are the resources I used.\nBackground:\n Bachelors in IT HelpDesk/Sysadmin for ~3 years (on-prem) Masters in IT (1 last semester) No professional cloud experience, but lots of on-prem experience. Linux/IaaC  Resources:\n Free - Reddit posts like this one Free - AWS Cloud Practitioner Essentials Video Course (6 hours) Free - AWS Overview White Paper ~$12 - Udemy Practice Exams (Shoot for 85%+)  And lastly, my rough notes. These notes cover all 6 hours of the AWS video course and Udemy practice exams.\nI recommend taking notes on all practice test terms you don\u0026rsquo;t recall (Amazon Macie, anyone?), understanding billing, understanding the Clouds* (CloudFront, CloudWatch, CloudFormation), and get a little hands-on AWS Free Tier experience.\nOther than that, it\u0026rsquo;s not that difficult. Just brain dump for the exam and deal with PearsonVue, and you\u0026rsquo;ll be fine.\n"
             }
         
     ,

@@ -12,11 +12,14 @@
 		<atom:link href="/blog/categories/" rel="self" type="application/rss+xml" />
 		
 		<item>
-			<title>Awsccp</title>
+			<title>AWS Certified Cloud Practitioner</title>
 			<link>https://wboll.dev/blog/post/awsccp/awsccp/</link>
-			<pubDate>Wed, 11 Nov 2020 15:48:55 -0500</pubDate>
+			<pubDate>Tue, 01 Sep 2020 11:42:00 -0400</pubDate>
 			<guid>https://wboll.dev/blog/post/awsccp/awsccp/</guid>
-			<description></description>
+			<description>Recently passed the AWS CCP exam after one week of studying. There are many guides like this on the Internet, but nevertheless are the resources I used.
+Background:
+ Bachelors in IT HelpDesk/Sysadmin for ~3 years (on-prem) Masters in IT (1 last semester) No professional cloud experience, but lots of on-prem experience. Linux/IaaC  Resources:
+ Free - Reddit posts like this one Free - AWS Cloud Practitioner Essentials Video Course (6 hours) Free - AWS Overview White Paper ~$12 - Udemy Practice Exams (Shoot for 85%+)  And lastly, my rough notes.</description>
 		</item>
       	
 		<item>
