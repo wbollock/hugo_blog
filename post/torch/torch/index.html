@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<title>Torch - Command Line for the Student Masses</title>
+
+
+  
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="alternate" type="application/rss+xml" href="https://wboll.dev/blog/index.xml" title="Will Bollock&#39;s Blog">
+
+<link id="dark-mode-theme" rel="stylesheet" href="https://wboll.dev/blog/css/dark.css" />
+<link rel="stylesheet" href="https://wboll.dev/blog/fontawesome/css/all.min.css" />
+
+<script src="https://wboll.dev/blog/js/bundle.js"></script>
+<script src="https://wboll.dev/blog/js/instantpage.js" type="module" defer></script>
+
+<script type="text/javascript">
+  var _paq = window._paq = window._paq || [];
+     
+      _paq.push(["setCookieDomain", "*.wboll.dev"]);
+        _paq.push(['trackPageView']);
+	  _paq.push(['enableLinkTracking']);
+	    (function() {
+	        var u="//wboll.dev/analytics/matomo/";
+		    _paq.push(['setTrackerUrl', u+'matomo.php']);
+		        _paq.push(['setSiteId', '1']);
+			    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+			        g.type='text/javascript'; g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+				  })();
+				  </script>
+				  <noscript><p><img src="//wboll.dev/analytics/matomo/matomo.php?idsite=1&amp;rec=1" style="border:0;" alt="" /></p></noscript>
+				  
+<meta name="generator" content="Hugo 0.77.0" />
+  </head>
+  <body>
+    
+  
+
+
+
+
+  <header>
+    <nav class="navbar">
+  <div class="nav">
+    
+      <a href="https://wboll.dev/blog/" class="nav-logo">
+      <img src="https://wboll.dev/blog/images/icon.png"
+           width="50"
+           height="50"
+           alt="Logo">
+      </a>
+    
+
+    <ul class="nav-links">
+      
+        
+          <li><a href="https://wboll.dev" name="About"><i class="fas fa-user fa-lg"></i></a></li>
+        
+      
+    </ul>
+  </div>
+</nav>
+
+    <div class="intro-header">
+      <div class="container">
+        <div class="post-heading">
+          
+            <h1>Torch - Command Line for the Student Masses</h1>
+          
+          
+            <span class="meta-post">
+  <i class="fa fa-calendar-alt"></i>&nbsp;Sep 1, 2020
+  
+</span>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+  <div class="container" role="main">
+    <article class="article" class="blog-post">
+      <p>If you&rsquo;re a system administrator looking for unique ways to incorporate Linux servers with class curriculums, this article may inspire methodologies for bringing the command line to the student masses.</p>
+<p>Estimate: 10 Minute Read</p>
+<h1 id="table-of-contents">Table of Contents</h1>
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#forward---what-you-can-gain-from-reading-this">Forward - What You Can Gain from Reading This</a></li>
+    <li><a href="#the-problem">The Problem</a></li>
+    <li><a href="#exposition">Exposition</a></li>
+    <li><a href="#what-we-implemented-uniquely">What We Implemented Uniquely</a>
+      <ul>
+        <li><a href="#sso-and-credentials">SSO and Credentials</a></li>
+        <li><a href="#what-about-mysql-credentials">What about MySQL credentials?</a></li>
+        <li><a href="#solving-the-sftp-problem">Solving the SFTP problem</a></li>
+        <li><a href="#a-quick-note-on-passwords">A Quick Note on Passwords</a></li>
+        <li><a href="#systemd---small-note">Systemd - Small Note</a></li>
+      </ul>
+    </li>
+    <li><a href="#how-the-rollout-went">How The Rollout Went</a>
+      <ul>
+        <li><a href="#user-testing">User Testing</a></li>
+        <li><a href="#scope-creep-and-the-first-day">Scope Creep and the First Day</a></li>
+      </ul>
+    </li>
+    <li><a href="#fail2ban-woes">Fail2ban Woes</a></li>
+    <li><a href="#miscellaneous-notes">Miscellaneous Notes</a></li>
+    <li><a href="#after-action-report">After Action Report</a></li>
+  </ul>
+</nav><h2 id="forward---what-you-can-gain-from-reading-this">Forward - What You Can Gain from Reading This</h2>
+<p>I asked on reddit&rsquo;s <a href="https://www.reddit.com/r/linuxadmin/">/r/linuxadmin</a> how they handle student-accessible servers. Many ideas were brought up - segmented Docker containers, locked down hosts, restrictive commands. I went with what I know best: a strong dose of Ansible, glorious SSSD, and trusty Bash.</p>
+<p>Our goal was for students to:</p>
+<ul>
+<li>Be able to quickly upload website files (wildcard SSL cert allows every student to have a nice and pretty lock on their webpages).</li>
+<li>Utilize MySQL for classwork or web development projects.</li>
+<li>Have an agile server that can be torn-down and restored from scratch quickly (*all() configuration through Ansible).</li>
+<li>Continue to use their web server after class is over. No more Wix, Weebly, or Squarespace.</li>
+</ul>
+<p>Links:</p>
+<ul>
+<li><a href="https://gist.github.com/wbollock/c42f68868515362dc2f890628f667fb2">Main script</a> to watch for account creation, create MySQL account, and fire off credentials to student.</li>
+</ul>
+<h2 id="the-problem">The Problem</h2>
+<p>One unfortunate reality I&rsquo;ve discovered, moving from an undergraduate IT student, to System Administrator pursing a Master&rsquo;s in IT, is that not all students share the same love of the Linux command line as I do.</p>
+<p>Most student&rsquo;s view the command line - a requirement for their Intro to MySQL class, or basic web development - as an obtuse, ancient obstacle for submitting their assignments.</p>
+<p>Therefore, we wanted to provide a server (Torch) that will be equally accessible to students that require a GUI for every application, and &ldquo;power user&rdquo; students itching for freedom on a university funded pseudo-VPS.</p>
+<h2 id="exposition">Exposition</h2>
+<p>Previously, <a href="https://cci.fsu.edu">CCI</a> (my org) operated 4 or so hosts, one for each class that required some server space.</p>
+<ul>
+<li>Each instructor created SSH accounts manually for each student - often with credentials shared <strong>class-wide</strong>. Students had no sense of privacy or identity with their Linux accounts.</li>
+<li>After class was over, students lost connection with their account. No way would they continue to use, or could use, accounts spanning across servers named by their course code (LIS1234, LIS4321, LIS5666, etc.)</li>
+<li>Advanced students had trouble developing personal projects on hosts without SSL, or permissions for multiple MySQL databases. How would we foster the next Zuckerberg without giving students the tools to experiment?</li>
+</ul>
+<p>Myself and my fellow system administrator wanted to create a sandbox for our students. One singular server to rule them all. A hostname easy to remember, credentials that matched their university experience across all services, and something accessible to students simply trying to get good grades or students pursuing programming projects.</p>
+<h2 id="what-we-implemented-uniquely">What We Implemented Uniquely</h2>
+<p>Not unique for you sysadmin veterans, but a first for our college.</p>
+<h3 id="sso-and-credentials">SSO and Credentials</h3>
+<p>SSO is obviously fantastic. No holds barred, SSO is the light at the end of the sysadmin tunnel. Every service we employ, whether it&rsquo;s logging, monitoring, or Ansible automation, needs to have SSO. Besides security benefits, it&rsquo;s just so convenient. Our students did not know such joy, recieving a list of usernames and passwords from instructors they would need to pull up before starting every assignment.</p>
+<p><strong><a href="https://sssd.io/">SSSD</a></strong> was our counter-measure for individualized credentials. My first project as a HelpDesk technician, SSSD allows fine tuning our Linux authentication from /etc/sudoers to SSH access. Despite being on Debian-based systems, SSSD is the core component of our Ansible configuration and delegating access to our systems. We were able to open up the server to every single student enrolled in a relevant course with ease.</p>
+<h3 id="what-about-mysql-credentials">What about MySQL credentials?</h3>
+<p>While it is certainly <em>possible</em> to use PAM in conjunction with MySQL to get SSSD logins, that was one layer of abstraction too far. I was shaking up class procedures that have been in place for a decade - faculty might not appreciate a complete and total overhaul.</p>
+<p>In comes postfix, and my fellow sysadmin&rsquo;s great web design (he used <a href="https://heml.io/">HEML</a> for creating the HTML email). This email is automatically sent as soon as a student connects to Torch.</p>
+<p><img src="../torch_email.png" alt="Torch Email"></p>
+<p>As you can see here, we are in-tune with the youth of today, adding emojis. The MySQL password is randomized with a little salt shaken on top.</p>
+<p><strong>The important part</strong>: Students receive this email at their student address on their first connection, regardless of connection type:</p>
+<ol>
+<li>SSH</li>
+<li><strong>SFTP</strong></li>
+<li>MySQL Workbench</li>
+</ol>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># insert credentials into email</span>
+sed -i <span style="color:#e6db74">&#34;s/FSUID/</span>$FSUID<span style="color:#e6db74">/g&#34;</span> /home/$FSUID/torch-template.html
+sed -i <span style="color:#e6db74">&#34;s/PASSWDDB/</span>$PASSWDDB<span style="color:#e6db74">/g&#34;</span> /home/$FSUID/torch-template.html
+
+<span style="color:#75715e"># email to students</span>
+cat /home/$FSUID/torch-template.html | mail -s <span style="color:#e6db74">&#34;Welcome to torch.cci.fsu.edu </span>$FSUID<span style="color:#e6db74">!&#34;</span> -a <span style="color:#e6db74">&#34;From: XXXXX@cci.fsu.edu&#34;</span> $FSUID@my.fsu.edu --content-type<span style="color:#f92672">=</span>text/html
+
+<span style="color:#75715e"># and email to HelpDesk for recovery or email trouble</span>
+cat /home/$FSUID/torch-template.html | mail -s <span style="color:#e6db74">&#34;Welcome to torch.cci.fsu.edu </span>$FSUID<span style="color:#e6db74">!&#34;</span> -a <span style="color:#e6db74">&#34;From: XXXXX@cci.fsu.edu&#34;</span> &lt;insert service desk email&gt; --content-type<span style="color:#f92672">=</span>text/html</code></pre></div>
+<h3 id="solving-the-sftp-problem">Solving the SFTP problem</h3>
+<p>Back to the main problem we were solving, making the host accessible for students regardless of initial skill level, we had to not only trigger our MySQL account creation on traditional SSH (also accounts for MySQL Workbench), but for SFTP through FileZilla, Transmit, etc.</p>
+<p>This was tough. Conventional methods of taking action upon first time account creation didn&rsquo;t work well - /etc/profile.d, /etc/skel, etc. all failed the SFTP litmus test.</p>
+<p>In comes <strong><a href="https://linux.die.net/man/1/inotifywatch">inotifywatch</a></strong>. A beautiful utility that helps monitor directories for changes. The one assumption I had about SSH and SFTP was that a new folder in /home/ would be created with the user&rsquo;s username.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># infinite loop</span>
+<span style="color:#66d9ef">while</span> true
+<span style="color:#66d9ef">do</span>
+
+<span style="color:#75715e"># upon new /home/ directory creation, spit out the username to $FSUID</span>
+FSUID<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>inotifywait -q -e create /home/ | awk <span style="color:#e6db74">&#39;{ print $NF }&#39;</span><span style="color:#66d9ef">)</span></code></pre></div>
+<p>Then check to see if the user already has an account - if not, their MySQL username/databases will be dropped.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">flag<span style="color:#f92672">=</span>/home/<span style="color:#e6db74">&#34;</span>$FSUID<span style="color:#e6db74">&#34;</span>/.flag_DONOTDELETE
+
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -e /home/$FSUID/$flag <span style="color:#f92672">]</span>
+        <span style="color:#66d9ef">then</span></code></pre></div>
+<p>This <a href="https://gist.github.com/wbollock/c42f68868515362dc2f890628f667fb2">GitHub Gist</a> has the complete script, edited for security.</p>
+<p>On a smaller note, I included some text into the above dot file to encourage any curious students to apply for a job - similar to other trendy websites including job advertisements in their source code.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">echo <span style="color:#e6db74">&#34;Reading the .dotfiles? You&#39;re a curious student. Apply for a job at the CCI HelpDesk and mention this message!&#34;</span> &gt;&gt; $flag</code></pre></div>
+<h3 id="a-quick-note-on-passwords">A Quick Note on Passwords</h3>
+<p>Security was a key objective, and I threw in a little bit of salt to help with the password generation, but it&rsquo;s probably not necessary and a little redundant.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">PASSWDDB<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>date +%s | sha256sum | base64 | head -c <span style="color:#ae81ff">12</span> ; echo<span style="color:#66d9ef">)</span></code></pre></div>
+<h3 id="systemd---small-note">Systemd - Small Note</h3>
+<p>One last thing that may be useful to someone is the systemd unit service to run the above program infinitely.</p>
+<pre><code>[Unit]
+Description=Torch First Login Setup
+
+[Service]
+ExecStart=/&lt;script location&gt;/classweb_login.sh
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+</code></pre><h2 id="how-the-rollout-went">How The Rollout Went</h2>
+<h3 id="user-testing">User Testing</h3>
+<p>Luckily I was enrolled in a Usability Analysis course when performing the initial Torch planning. I realized it may be useful to have some users test the MySQL generation, usability, and login system other than myself.</p>
+<p>Our HelpDesk technicians performed valuable user testing, letting me know where I was assuming too much, or what parts were easy.</p>
+<p>Example of testing tasks:</p>
+<pre><code>2) Uploading a website file 
+
+  
+
+Create a file titled &quot;index.html&quot; on your local machine. Type whatever you would like in that, it can be a simple phrase or word.  
+
+Connect to the server with SFTP using the parameters above.  
+
+Do you see a file titled ‘Torch Account Information’? If so, can you open it and read the contents? 
+
+Upload the index.html file with an FTP program, such as FileZilla or CyberDuck, to either, &quot;public_html&quot; in your home directory, or /web/FSUID. Upload your index.html to either spot. 
+
+Using a web browser, go to https://torch.cci.fsu.edu/~FSUID. Did your site load properly, and did you get a lock on the webpage (SSL)? 
+</code></pre><h3 id="scope-creep-and-the-first-day">Scope Creep and the First Day</h3>
+<p>As the semester drew closer and closer, and working with professors on the new system, I was worried. What would happen if two users logged in at the exact same second? What about different versions of MacOS, MySQL Workbench, Putty, Mac Terminal, and Gentoo users?</p>
+<p>At the last second, our scope went up dramatically. We decided to incorporate the behemoth MySQL-only server into Torch. This made a lot of sense - MySQL 101 students could simply ignore the web development aspects, and have MySQL credentials they could use throughout their degree.</p>
+<p>Then it arrived - the onslaught of logins. Enjoy the photos below:</p>
+<p><img src="../torch_registrations.png" alt="torch registrations"></p>
+<p>There was confusion in one class that <em>we</em> provided the login credentials, cue tickets:</p>
+<p><img src="../tickets.png" alt="tickets"></p>
+<p>I eventually setup an auto-responder for the sheer amount of tickets that we could not assist with.</p>
+<p>Some commands I didn&rsquo;t expect users to run:</p>
+<pre><code>apt install putty-tools (Obviously, students don't have sudo access)
+
+/mnt/c/Users/some_student$ ssh some_student@torch.cci.fsu.edu (Copying Windows CMD SSH, and trying to SSH into the server they're already logged into)
+
+cd C:\Users\some_student\Desktop (Self Explanatory)
+
+</code></pre><p>Thankfully we had Graylog setup to easily parse through command history. My point here is not to make fun of students not having a solid grasp on the command line - only to point out that I didn&rsquo;t expect such issues from my testing or thought process. We&rsquo;ve all been there before.</p>
+<h2 id="fail2ban-woes">Fail2ban Woes</h2>
+<p>Ever since taking one security class and reading <a href="https://www.amazon.com/Sandworm-Cyberwar-Kremlins-Dangerous-Hackers/dp/0385544405">Sandworm</a>, I&rsquo;ve become much more interested in securing our hosts.</p>
+<p>You can see some of our attack origins here:</p>
+<p><img src="../geoip.png" alt="attack origins"></p>
+<p>While these are automated bot attempts, we did have an unfortunate encounter with some malicious Turks a while back. As such, I have strict fail2ban rules, ranging from SSH attempts to amount of 404 GETs. After having multiple students get caught in the filter (allowing ~10 failed SSH attempts, x3&hellip;.) I had to raise our filter limit for this server only.</p>
+<p>Graylog was fantastic for searching individual IPV4 addresses and seeing if students were caught in the fail2ban net.</p>
+<h2 id="miscellaneous-notes">Miscellaneous Notes</h2>
+<p><strong><a href="https://github.com/tldr-pages/tldr">tl;dr</a></strong> - tldr is a &ldquo;Collaborative cheatsheets for console commands&rdquo;, and the only FOSS project I&rsquo;ve been able to contribute to. I hope some students find a good use for it - I use it everyday. I advertise its existence on the torch.cci.fsu.edu homepage.</p>
+<pre><code>[web15c@torch]~❯ tldr tar
+tar
+
+Archiving utility.
+Often combined with a compression method, such as gzip or bzip.
+More information: &lt;https://www.gnu.org/software/tar&gt;.
+
+- Create an archive from files:
+  tar cf target.tar file1 file2 file3
+
+- Create a gzipped archive:
+  tar czf target.tar.gz file1 file2 file3
+
+- Create a gzipped archive from a directory using relative paths:
+  tar czf target.tar.gz -C path/to/directory .
+
+- Extract a (compressed) archive into the current directory:
+  tar xf source.tar[.gz|.bz2|.xz]
+
+- Extract a (compressed) archive into the target directory:
+  tar xf source.tar[.gz|.bz2|.xz] -C directory
+</code></pre><p>Don&rsquo;t skimp on the web development - my attempt at the HTML email versus my coworker&rsquo;s attempt:</p>
+<p><img src="../email_compare.png" alt="email comparison"></p>
+<p>And one of the webpages (basic template HTML5UP):</p>
+<p><img src="../website_compare.png" alt="email comparison"></p>
+<h2 id="after-action-report">After Action Report</h2>
+<p>All in all, my first major project for the general public (students in my university&rsquo;s college) went well. We had around 125 accounts created, and maybe 20 tickets created needing help. ~16% of students having issues is not a good metric. However, with better understanding for faculty, and much improved help resources on the main domain, this should be easier every semester to come.</p>
+<p>Some important goals I have for the future:</p>
+<ul>
+<li>Monitoring /home/ folder size, not just the server&rsquo;s disk space remaining.</li>
+<li>Better usability analysis of student pain points, and finding solutions.</li>
+<li>Continuing to adjust the server configuration to match course requirements and satisfy faculty (automated grading scripts?).</li>
+<li>One edge-case I couldn&rsquo;t solve for is users logging in without the student email suffix (@my.fsu.edu) - may do some AD lookups to remedy this.</li>
+</ul>
+
+      
+        <div class="blog-tags">
+          
+            <a href="https://wboll.dev/blog//tags/linux/">linux</a>&nbsp;
+          
+            <a href="https://wboll.dev/blog//tags/bash/">bash</a>&nbsp;
+          
+        </div>
+      
+    </article>
+    
+      <script>
+    document.addEventListener('scroll', function() {
+        if (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) {
+            document.getElementById('backtotopButton').style.opacity = "1";
+            document.getElementById('backtotopButton').style.transition = "0.5s";
+        } else {
+            document.getElementById('backtotopButton').style.opacity = "0";
+            document.getElementById('backtotopButton').style.transition = "0.5s";
+        }
+    });
+
+    function topFunction() {
+        document.body.scrollTop = 0;            
+        document.documentElement.scrollTop = 0; 
+    }
+</script>
+      <button onclick="topFunction()" id="backtotopButton">
+        <i class="fa fa-angle-up"></i>
+      </button>
+    
+    
+      
+      
+</div>
+
+    <footer>
+  <div class="container">
+    <p class="credits copyright">
+      <a href="https://wboll.dev/blog/about">Will Bollock</a>
+      &nbsp;&copy;
+      2020
+
+      
+        &nbsp;/&nbsp;
+        <a href="https://wboll.dev/blog/">Will Bollock&#39;s Blog</a>
+      
+
+      &nbsp;&ndash;&nbsp;
+      <i class="fas fa-moon" id="dark-mode-toggle"></i>
+
+      <p class="credits theme-by">
+        Powered By <a href="https://gohugo.io">Hugo</a>&nbsp;Theme <a href="https://github.com/matsuyoshi30/harbor">Harbor</a>
+      </p>
+    </p>
+  </div>
+</footer>
+
+  </body>
+</html>
