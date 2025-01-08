@@ -1,0 +1,70 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>All Posts - wboll.dev</title>
+        <link>https://wboll.dev/posts/</link>
+        <description>All Posts | wboll.dev</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Wed, 11 Nov 2020 11:18:29 -0500</lastBuildDate><atom:link href="https://wboll.dev/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>AWS Certified Cloud Practitioner</title>
+    <link>https://wboll.dev/posts/awsccp/</link>
+    <pubDate>Wed, 11 Nov 2020 11:18:29 -0500</pubDate><author>
+        <name>Author</name>
+    </author><guid>https://wboll.dev/posts/awsccp/</guid>
+    <description><![CDATA[<p>A short post on studying for and passing AWS CCP.</p>
+<p>Estimate: 1 Minute Read</p>
+<h2 id="aws-certified-cloud-practitioner" class="headerLink">
+    <a href="#aws-certified-cloud-practitioner" class="header-mark"></a>AWS Certified Cloud Practitioner</h2><p>Recently passed the AWS CCP (91.7% 😀) exam after one week of studying. There are many guides like this on the Internet, but nevertheless here are the resources I used.</p>
+<h3 id="background" class="headerLink">
+    <a href="#background" class="header-mark"></a>Background:</h3><ul>
+<li>Bachelors in IT</li>
+<li>Masters in IT (1 last semester)</li>
+<li>HelpDesk/Sysadmin for ~3 years (on-prem)</li>
+<li>No professional cloud experience, but lots of on-prem experience. Linux/IaaC</li>
+</ul>
+<h3 id="resources" class="headerLink">
+    <a href="#resources" class="header-mark"></a>Resources:</h3><ul>
+<li><a href="https://www.reddit.com/r/AWSCertifications/comments/b2m2vk/anyone_taken_the_aws_certified_cloud_practitioner/" target="_blank" rel="noopener noreferrer">Free - Reddit posts like this one</a></li>
+<li><a href="https://www.aws.training/SessionSearch?pageNumber=1&amp;courseId=17675" target="_blank" rel="noopener noreferrer">Free - AWS Cloud Practitioner Essentials Video Course (6 hours)</a></li>
+<li><a href="https://d0.awsstatic.com/whitepapers/aws-overview.pdf" target="_blank" rel="noopener noreferrer">Free - AWS Overview White Paper</a></li>
+<li><a href="https://www.udemy.com/course/aws-certified-cloud-practitioner-practice-test/" target="_blank" rel="noopener noreferrer">~$12 - Udemy Practice Exams (Shoot for 85%+)</a></li>
+</ul>
+<p>And lastly, <a href="../AWSCloudPractitioner.pdf" rel="">my rough notes</a>. These notes cover all 6 hours of the AWS video course and Udemy practice exams.</p>]]></description>
+</item><item>
+    <title>Torch - Command Line for the Student Masses</title>
+    <link>https://wboll.dev/posts/torch/</link>
+    <pubDate>Sat, 12 Sep 2020 10:38:45 -0500</pubDate><author>
+        <name>Author</name>
+    </author><guid>https://wboll.dev/posts/torch/</guid>
+    <description><![CDATA[<p>If you’re a system administrator looking for unique ways to incorporate Linux servers with class curriculums, this article may inspire methodologies for bringing the command line to the student masses.</p>
+<p>Estimate: 10 Minute Read</p>
+<h1 id="table-of-contents" class="headerLink">
+    <a href="#table-of-contents" class="header-mark"></a>Table of Contents</h1><ul>
+<li><a href="#table-of-contents" rel="">Table of Contents</a>
+<ul>
+<li><a href="#forward---what-you-can-gain-from-reading-this" rel="">Forward - What You Can Gain from Reading This</a></li>
+<li><a href="#the-problem" rel="">The Problem</a></li>
+<li><a href="#exposition" rel="">Exposition</a></li>
+<li><a href="#what-we-implemented-uniquely" rel="">What We Implemented Uniquely</a>
+<ul>
+<li><a href="#sso-and-credentials" rel="">SSO and Credentials</a></li>
+<li><a href="#what-about-mysql-credentials" rel="">What about MySQL credentials?</a></li>
+<li><a href="#solving-the-sftp-problem" rel="">Solving the SFTP problem</a></li>
+<li><a href="#a-quick-note-on-passwords" rel="">A Quick Note on Passwords</a></li>
+<li><a href="#systemd---small-note" rel="">Systemd - Small Note</a></li>
+</ul>
+</li>
+<li><a href="#how-the-rollout-went" rel="">How The Rollout Went</a>
+<ul>
+<li><a href="#user-testing" rel="">User Testing</a></li>
+<li><a href="#scope-creep-and-the-first-day" rel="">Scope Creep and the First Day</a></li>
+</ul>
+</li>
+<li><a href="#fail2ban-woes" rel="">Fail2ban Woes</a></li>
+<li><a href="#miscellaneous-notes" rel="">Miscellaneous Notes</a></li>
+<li><a href="#after-action-report" rel="">After Action Report</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="forward---what-you-can-gain-from-reading-this" class="headerLink">
+    <a href="#forward---what-you-can-gain-from-reading-this" class="header-mark"></a>Forward - What You Can Gain from Reading This</h2><p>I asked on reddit’s <a href="https://www.reddit.com/r/linuxadmin/" target="_blank" rel="noopener noreferrer">/r/linuxadmin</a> how they handle student-accessible servers. Many ideas were brought up - segmented Docker containers, locked down hosts, restrictive commands. I went with what I know best: a strong dose of Ansible, glorious SSSD, and trusty Bash.</p>]]></description>
+</item></channel>
+</rss>

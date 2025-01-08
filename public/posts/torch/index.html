@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" /><title>Torch - Command Line for the Student Masses - wboll.dev</title><meta name="Description" content=""><meta property="og:url" content="https://wboll.dev/posts/torch/">
+  <meta property="og:site_name" content="wboll.dev">
+  <meta property="og:title" content="Torch - Command Line for the Student Masses">
+  <meta property="og:description" content="If you’re a system administrator looking for unique ways to incorporate Linux servers with class curriculums, this article may inspire methodologies for bringing the command line to the student masses.
+Estimate: 10 Minute Read
+Table of Contents Table of Contents Forward - What You Can Gain from Reading This The Problem Exposition What We Implemented Uniquely SSO and Credentials What about MySQL credentials? Solving the SFTP problem A Quick Note on Passwords Systemd - Small Note How The Rollout Went User Testing Scope Creep and the First Day Fail2ban Woes Miscellaneous Notes After Action Report Forward - What You Can Gain from Reading ThisI asked on reddit’s /r/linuxadmin how they handle student-accessible servers. Many ideas were brought up - segmented Docker containers, locked down hosts, restrictive commands. I went with what I know best: a strong dose of Ansible, glorious SSSD, and trusty Bash.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2020-09-12T10:38:45-05:00">
+    <meta property="article:modified_time" content="2020-09-12T10:38:45-05:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Torch - Command Line for the Student Masses">
+  <meta name="twitter:description" content="If you’re a system administrator looking for unique ways to incorporate Linux servers with class curriculums, this article may inspire methodologies for bringing the command line to the student masses.
+Estimate: 10 Minute Read
+Table of Contents Table of Contents Forward - What You Can Gain from Reading This The Problem Exposition What We Implemented Uniquely SSO and Credentials What about MySQL credentials? Solving the SFTP problem A Quick Note on Passwords Systemd - Small Note How The Rollout Went User Testing Scope Creep and the First Day Fail2ban Woes Miscellaneous Notes After Action Report Forward - What You Can Gain from Reading ThisI asked on reddit’s /r/linuxadmin how they handle student-accessible servers. Many ideas were brought up - segmented Docker containers, locked down hosts, restrictive commands. I went with what I know best: a strong dose of Ansible, glorious SSSD, and trusty Bash.">
+<meta name="application-name" content="wboll.dev">
+<meta name="apple-mobile-web-app-title" content="wboll.dev">
+
+<meta name="theme-color" content="#f8f8f8"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<link rel="canonical" href="https://wboll.dev/posts/torch/" /><link rel="next" href="https://wboll.dev/posts/awsccp/" />
+<link rel="stylesheet" href="/css/main.min.css"><link rel="stylesheet" href="/css/style.min.css"><script type="application/ld+json">{"@context": "https://schema.org","@type": "BlogPosting",
+        "headline": "Torch - Command Line for the Student Masses",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https://wboll.dev/posts/torch/"
+        },"genre": "posts","wordcount":  1934 ,
+        "url": "https://wboll.dev/posts/torch/","datePublished": "2020-09-12T10:38:45-05:00","dateModified": "2020-09-12T10:38:45-05:00","publisher": {
+            "@type": "Organization",
+            "name": "Author"},"author": {
+                "@type": "Person",
+                "name": "Author",
+                "url": "/"
+            },"description": ""
+    }</script></head>
+
+
+<body data-instant-intensity="viewport"><script type="text/javascript">
+    function setTheme(theme) {
+      document.body.setAttribute('theme', theme); 
+      document.documentElement.className = theme;
+      document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark');
+      if (theme === 'light') {
+        document.documentElement.classList.remove('tw-dark')
+      } else {
+        document.documentElement.classList.add('tw-dark')
+      }
+      window.theme = theme;   
+      window.isDark = window.theme !== 'light' 
+    }
+    function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+    function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+    if (window.localStorage && localStorage.getItem('theme')) {
+        let theme = localStorage.getItem('theme');
+        if (theme === 'light' || theme === 'dark') {
+        setTheme(theme);
+        } else {
+            if ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                setTheme('dark');
+            } else {
+                setTheme('light');
+            }
+        }
+      } else { 
+        if ('' === 'light' || '' === 'dark') 
+            setTheme(''), saveTheme(''); 
+        else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');
+    }
+    let metaColors = {'light': '#f8f8f8','dark': '#161b22'}
+    getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    window.switchThemeEventSet = new Set()
+</script><div id="back-to-top"></div>
+    <div id="mask"></div><header class="desktop print:!tw-hidden" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="wboll.dev">wboll.dev</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item"
+                    href="/posts/" > Posts </a><a class="menu-item"
+                    href="/tags/" > Tags </a><a class="menu-item"
+                    href="/categories/" > Categories </a><span class="menu-item delimiter"></span><button class="menu-item theme-switch" aria-label="Switch Theme">
+                    <svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M8 256c0 136.966 111.033 248 248 248s248-111.034 248-248S392.966 8 256 8 8 119.033 8 256zm248 184V72c101.705 0 184 82.311 184 184 0 101.705-82.311 184-184 184z"/></svg>
+                </button></div>
+        </div>
+    </div>
+</header><header class="mobile print:!tw-hidden" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="wboll.dev">wboll.dev</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/posts/" title="" >Posts</a><a class="menu-item" href="/tags/" title="" >Tags</a><a class="menu-item" href="/categories/" title="" >Categories</a><button class="menu-item theme-switch tw-w-full" aria-label="Switch Theme">
+                <svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M8 256c0 136.966 111.033 248 248 248s248-111.034 248-248S392.966 8 256 8 8 119.033 8 256zm248 184V72c101.705 0 184 82.311 184 184 0 101.705-82.311 184-184 184z"/></svg>
+            </button></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div><main class="tw-mx-4"><dialog id="toc-dialog" class="tw-max-w-full tw-w-full tw-max-h-full tw-h-full tw-ml-16">
+        <div class="toc tw-mx-4 tw-max-w-full">
+            <h2 class="tw-mx-0 tw-my-6 tw-uppercase tw-text-2xl">Contents</h2>
+            <div class="toc-content"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#forward---what-you-can-gain-from-reading-this">Forward - What You Can Gain from Reading This</a></li>
+    <li><a href="#the-problem">The Problem</a></li>
+    <li><a href="#exposition">Exposition</a></li>
+    <li><a href="#what-we-implemented-uniquely">What We Implemented Uniquely</a>
+      <ul>
+        <li><a href="#sso-and-credentials">SSO and Credentials</a></li>
+        <li><a href="#what-about-mysql-credentials">What about MySQL credentials?</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#solving-the-sftp-problem">Solving the SFTP problem</a></li>
+        <li><a href="#a-quick-note-on-passwords">A Quick Note on Passwords</a></li>
+        <li><a href="#systemd---small-note">Systemd - Small Note</a></li>
+      </ul>
+    </li>
+    <li><a href="#how-the-rollout-went">How The Rollout Went</a>
+      <ul>
+        <li><a href="#user-testing">User Testing</a></li>
+        <li><a href="#scope-creep-and-the-first-day">Scope Creep and the First Day</a></li>
+      </ul>
+    </li>
+    <li><a href="#fail2ban-woes">Fail2ban Woes</a></li>
+    <li><a href="#miscellaneous-notes">Miscellaneous Notes</a></li>
+    <li><a href="#after-action-report">After Action Report</a></li>
+  </ul>
+</nav></div>
+        </div>
+    </dialog><article class="page single print:!tw-w-full print:!tw-max-w-none print:!tw-m-0 print:!tw-p-0"><h1 class="single-title" data-pagefind-meta="date:2020-09-12" data-pagefind-body>Torch - Command Line for the Student Masses</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm0 96c48.6 0 88 39.4 88 88s-39.4 88-88 88-88-39.4-88-88 39.4-88 88-88zm0 344c-58.7 0-111.3-26.6-146.5-68.2 18.8-35.4 55.6-59.8 98.5-59.8 2.4 0 4.8.4 7.1 1.1 13 4.2 26.6 6.9 40.9 6.9 14.3 0 28-2.7 40.9-6.9 2.3-.7 4.7-1.1 7.1-1.1 42.9 0 79.7 24.4 98.5 59.8C359.3 421.4 306.7 448 248 448z"/></svg><a href="/" title="Author" rel=" author" class="author">Author</a>
+                </span></div>
+            <div class="post-meta-line"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M148 288h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm108-12v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 96v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm-96 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm192 0v-40c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12v40c0 6.6 5.4 12 12 12h40c6.6 0 12-5.4 12-12zm96-260v352c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h48V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h128V12c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h48c26.5 0 48 21.5 48 48zm-48 346V160H48v298c0 3.3 2.7 6 6 6h340c3.3 0 6-2.7 6-6z"/></svg>&nbsp;<time datetime="2020-09-12">2020-09-12</time>&nbsp;<svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M402.3 344.9l32-32c5-5 13.7-1.5 13.7 5.7V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h273.5c7.1 0 10.7 8.6 5.7 13.7l-32 32c-1.5 1.5-3.5 2.3-5.7 2.3H48v352h352V350.5c0-2.1.8-4.1 2.3-5.6zm156.6-201.8L296.3 405.7l-90.4 10c-26.2 2.9-48.5-19.2-45.6-45.6l10-90.4L432.9 17.1c22.9-22.9 59.9-22.9 82.7 0l43.2 43.2c22.9 22.9 22.9 60 .1 82.8zM460.1 174L402 115.9 216.2 301.8l-7.3 65.3 65.3-7.3L460.1 174zm64.8-79.7l-43.2-43.2c-4.1-4.1-10.8-4.1-14.8 0L436 82l58.1 58.1 30.9-30.9c4-4.2 4-10.8-.1-14.9z"/></svg>&nbsp;<time datetime="2020-09-12">2020-09-12</time>&nbsp;<svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M497.9 142.1l-46.1 46.1c-4.7 4.7-12.3 4.7-17 0l-111-111c-4.7-4.7-4.7-12.3 0-17l46.1-46.1c18.7-18.7 49.1-18.7 67.9 0l60.1 60.1c18.8 18.7 18.8 49.1 0 67.9zM284.2 99.8L21.6 362.4.4 483.9c-2.9 16.4 11.4 30.6 27.8 27.8l121.5-21.3 262.6-262.6c4.7-4.7 4.7-12.3 0-17l-111-111c-4.8-4.7-12.4-4.7-17.1 0zM124.1 339.9c-5.5-5.5-5.5-14.3 0-19.8l154-154c5.5-5.5 14.3-5.5 19.8 0s5.5 14.3 0 19.8l-154 154c-5.5 5.5-14.3 5.5-19.8 0zM88 424h48v36.3l-64.5 11.3-31.1-31.1L51.7 376H88v48z"/></svg>&nbsp;1934 words&nbsp;
+                    <svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm61.8-104.4l-84.9-61.7c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h32c6.6 0 12 5.4 12 12v141.7l66.8 48.6c5.4 3.9 6.5 11.4 2.6 16.8L334.6 349c-3.9 5.3-11.4 6.5-16.8 2.6z"/></svg>&nbsp;9 minutes&nbsp;</div>
+        </div><div class="content" id="content" data-pagefind-body><p>If you’re a system administrator looking for unique ways to incorporate Linux servers with class curriculums, this article may inspire methodologies for bringing the command line to the student masses.</p>
+<p>Estimate: 10 Minute Read</p>
+<h1 id="table-of-contents" class="headerLink">
+    <a href="#table-of-contents" class="header-mark"></a>Table of Contents</h1><ul>
+<li><a href="#table-of-contents" rel="">Table of Contents</a>
+<ul>
+<li><a href="#forward---what-you-can-gain-from-reading-this" rel="">Forward - What You Can Gain from Reading This</a></li>
+<li><a href="#the-problem" rel="">The Problem</a></li>
+<li><a href="#exposition" rel="">Exposition</a></li>
+<li><a href="#what-we-implemented-uniquely" rel="">What We Implemented Uniquely</a>
+<ul>
+<li><a href="#sso-and-credentials" rel="">SSO and Credentials</a></li>
+<li><a href="#what-about-mysql-credentials" rel="">What about MySQL credentials?</a></li>
+<li><a href="#solving-the-sftp-problem" rel="">Solving the SFTP problem</a></li>
+<li><a href="#a-quick-note-on-passwords" rel="">A Quick Note on Passwords</a></li>
+<li><a href="#systemd---small-note" rel="">Systemd - Small Note</a></li>
+</ul>
+</li>
+<li><a href="#how-the-rollout-went" rel="">How The Rollout Went</a>
+<ul>
+<li><a href="#user-testing" rel="">User Testing</a></li>
+<li><a href="#scope-creep-and-the-first-day" rel="">Scope Creep and the First Day</a></li>
+</ul>
+</li>
+<li><a href="#fail2ban-woes" rel="">Fail2ban Woes</a></li>
+<li><a href="#miscellaneous-notes" rel="">Miscellaneous Notes</a></li>
+<li><a href="#after-action-report" rel="">After Action Report</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="forward---what-you-can-gain-from-reading-this" class="headerLink">
+    <a href="#forward---what-you-can-gain-from-reading-this" class="header-mark"></a>Forward - What You Can Gain from Reading This</h2><p>I asked on reddit’s <a href="https://www.reddit.com/r/linuxadmin/" target="_blank" rel="noopener noreferrer">/r/linuxadmin</a> how they handle student-accessible servers. Many ideas were brought up - segmented Docker containers, locked down hosts, restrictive commands. I went with what I know best: a strong dose of Ansible, glorious SSSD, and trusty Bash.</p>
+<p>Our goal was for students to:</p>
+<ul>
+<li>Be able to quickly upload website files (wildcard SSL cert allows every student to have a nice and pretty lock on their webpages).</li>
+<li>Utilize MySQL for classwork or web development projects.</li>
+<li>Have an agile server that can be torn-down and restored from scratch quickly (*all() configuration through Ansible).</li>
+<li>Continue to use their web server after class is over. No more Wix, Weebly, or Squarespace.</li>
+</ul>
+<p>Links:</p>
+<ul>
+<li><a href="https://gist.github.com/wbollock/c42f68868515362dc2f890628f667fb2" target="_blank" rel="noopener noreferrer">Main script</a> to watch for account creation, create MySQL account, and fire off credentials to student.</li>
+</ul>
+<h2 id="the-problem" class="headerLink">
+    <a href="#the-problem" class="header-mark"></a>The Problem</h2><p>One unfortunate reality I’ve discovered, moving from an undergraduate IT student, to System Administrator pursing a Master’s in IT, is that not all students share the same love of the Linux command line as I do.</p>
+<p>Most student’s view the command line - a requirement for their Intro to MySQL class, or basic web development - as an obtuse, ancient obstacle for submitting their assignments.</p>
+<p>Therefore, we wanted to provide a server (Torch) that will be equally accessible to students that require a GUI for every application, and “power user” students itching for freedom on a university funded pseudo-VPS.</p>
+<h2 id="exposition" class="headerLink">
+    <a href="#exposition" class="header-mark"></a>Exposition</h2><p>Previously, <a href="https://cci.fsu.edu" target="_blank" rel="noopener noreferrer">CCI</a> (my org) operated 4 or so hosts, one for each class that required some server space.</p>
+<ul>
+<li>Each instructor created SSH accounts manually for each student - often with credentials shared <strong>class-wide</strong>. Students had no sense of privacy or identity with their Linux accounts.</li>
+<li>After class was over, students lost connection with their account. No way would they continue to use, or could use, accounts spanning across servers named by their course code (LIS1234, LIS4321, LIS5666, etc.)</li>
+<li>Advanced students had trouble developing personal projects on hosts without SSL, or permissions for multiple MySQL databases. How would we foster the next Zuckerberg without giving students the tools to experiment?</li>
+</ul>
+<p>Myself and my fellow system administrator wanted to create a sandbox for our students. One singular server to rule them all. A hostname easy to remember, credentials that matched their university experience across all services, and something accessible to students simply trying to get good grades or students pursuing programming projects.</p>
+<h2 id="what-we-implemented-uniquely" class="headerLink">
+    <a href="#what-we-implemented-uniquely" class="header-mark"></a>What We Implemented Uniquely</h2><p>Not unique for you sysadmin veterans, but a first for our college.</p>
+<h3 id="sso-and-credentials" class="headerLink">
+    <a href="#sso-and-credentials" class="header-mark"></a>SSO and Credentials</h3><p>SSO is obviously fantastic. No holds barred, SSO is the light at the end of the sysadmin tunnel. Every service we employ, whether it’s logging, monitoring, or Ansible automation, needs to have SSO. Besides security benefits, it’s just so convenient. Our students did not know such joy, recieving a list of usernames and passwords from instructors they would need to pull up before starting every assignment.</p>
+<p><strong><a href="https://sssd.io/" target="_blank" rel="noopener noreferrer">SSSD</a></strong> was our counter-measure for individualized credentials. My first project as a HelpDesk technician, SSSD allows fine tuning our Linux authentication from /etc/sudoers to SSH access. Despite being on Debian-based systems, SSSD is the core component of our Ansible configuration and delegating access to our systems. We were able to open up the server to every single student enrolled in a relevant course with ease.</p>
+<h3 id="what-about-mysql-credentials" class="headerLink">
+    <a href="#what-about-mysql-credentials" class="header-mark"></a>What about MySQL credentials?</h3><p>While it is certainly <em>possible</em> to use PAM in conjunction with MySQL to get SSSD logins, that was one layer of abstraction too far. I was shaking up class procedures that have been in place for a decade - faculty might not appreciate a complete and total overhaul.</p>
+<p>In comes postfix, and my fellow sysadmin’s great web design (he used <a href="https://heml.io/" target="_blank" rel="noopener noreferrer">HEML</a> for creating the HTML email). This email is automatically sent as soon as a student connects to Torch.</p>
+<p><img class="tw-inline" loading="lazy" src=../torch_email.png   alt="Torch Email"  ></p>
+<p>As you can see here, we are in-tune with the youth of today, adding emojis. The MySQL password is randomized with a little salt shaken on top.</p>
+<p><strong>The important part</strong>: Students receive this email at their student address on their first connection, regardless of connection type:</p>
+<ol>
+<li>
+<p>SSH</p>
+</li>
+<li>
+<p><strong>SFTP</strong></p>
+</li>
+<li>
+<p>MySQL Workbench</p>
+<h1 id="insert-credentials-into-email" class="headerLink">
+    <a href="#insert-credentials-into-email" class="header-mark"></a>insert credentials into email</h1><p>sed -i &ldquo;s/FSUID/$FSUID/g&rdquo; /home/$FSUID/torch-template.html
+sed -i &ldquo;s/PASSWDDB/$PASSWDDB/g&rdquo; /home/$FSUID/torch-template.html</p>
+<h1 id="email-to-students" class="headerLink">
+    <a href="#email-to-students" class="header-mark"></a>email to students</h1><p>cat /home/$FSUID/torch-template.html | mail -s &ldquo;Welcome to torch.cci.fsu.edu $FSUID!&rdquo; -a &ldquo;From: <a href="mailto:XXXXX@cci.fsu.edu" rel="">XXXXX@cci.fsu.edu</a>&rdquo; $FSUID@my.fsu.edu &ndash;content-type=text/html</p>
+<h1 id="and-email-to-helpdesk-for-recovery-or-email-trouble" class="headerLink">
+    <a href="#and-email-to-helpdesk-for-recovery-or-email-trouble" class="header-mark"></a>and email to HelpDesk for recovery or email trouble</h1><p>cat /home/$FSUID/torch-template.html | mail -s &ldquo;Welcome to torch.cci.fsu.edu $FSUID!&rdquo; -a &ldquo;From: <a href="mailto:XXXXX@cci.fsu.edu" rel="">XXXXX@cci.fsu.edu</a>&rdquo; <!-- raw HTML omitted --> &ndash;content-type=text/html</p>
+</li>
+</ol>
+<h3 id="solving-the-sftp-problem" class="headerLink">
+    <a href="#solving-the-sftp-problem" class="header-mark"></a>Solving the SFTP problem</h3><p>Back to the main problem we were solving, making the host accessible for students regardless of initial skill level, we had to not only trigger our MySQL account creation on traditional SSH (also accounts for MySQL Workbench), but for SFTP through FileZilla, Transmit, etc.</p>
+<p>This was tough. Conventional methods of taking action upon first time account creation didn’t work well - /etc/profile.d, /etc/skel, etc. all failed the SFTP litmus test.</p>
+<p>In comes <strong><a href="https://linux.die.net/man/1/inotifywatch" target="_blank" rel="noopener noreferrer">inotifywatch</a></strong>. A beautiful utility that helps monitor directories for changes. The one assumption I had about SSH and SFTP was that a new folder in /home/ would be created with the user’s username.</p>
+<pre><code># infinite loop
+while true
+do
+
+# upon new /home/ directory creation, spit out the username to $FSUID
+FSUID=$(inotifywait -q -e create /home/ | awk '{ print $NF }')
+</code></pre>
+<p>Then check to see if the user already has an account - if not, their MySQL username/databases will be dropped.</p>
+<pre><code>flag=/home/&quot;$FSUID&quot;/.flag_DONOTDELETE
+
+        if [ -e /home/$FSUID/$flag ]
+        then
+</code></pre>
+<p>This <a href="https://gist.github.com/wbollock/c42f68868515362dc2f890628f667fb2" target="_blank" rel="noopener noreferrer">GitHub Gist</a> has the complete script, edited for security.</p>
+<p>On a smaller note, I included some text into the above dot file to encourage any curious students to apply for a job - similar to other trendy websites including job advertisements in their source code.</p>
+<pre><code>echo &quot;Reading the .dotfiles? You're a curious student. Apply for a job at the CCI HelpDesk and mention this message!&quot; &gt;&gt; $flag
+</code></pre>
+<h3 id="a-quick-note-on-passwords" class="headerLink">
+    <a href="#a-quick-note-on-passwords" class="header-mark"></a>A Quick Note on Passwords</h3><p>Security was a key objective, and I threw in a little bit of salt to help with the password generation, but it’s probably not necessary and a little redundant.</p>
+<pre><code>PASSWDDB=$(date +%s | sha256sum | base64 | head -c 12 ; echo)
+</code></pre>
+<h3 id="systemd---small-note" class="headerLink">
+    <a href="#systemd---small-note" class="header-mark"></a>Systemd - Small Note</h3><p>One last thing that may be useful to someone is the systemd unit service to run the above program infinitely.</p>
+<pre><code>[Unit]
+Description=Torch First Login Setup
+
+[Service]
+ExecStart=/&lt;script location&gt;/classweb_login.sh
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<h2 id="how-the-rollout-went" class="headerLink">
+    <a href="#how-the-rollout-went" class="header-mark"></a>How The Rollout Went</h2><h3 id="user-testing" class="headerLink">
+    <a href="#user-testing" class="header-mark"></a>User Testing</h3><p>Luckily I was enrolled in a Usability Analysis course when performing the initial Torch planning. I realized it may be useful to have some users test the MySQL generation, usability, and login system other than myself.</p>
+<p>Our HelpDesk technicians performed valuable user testing, letting me know where I was assuming too much, or what parts were easy.</p>
+<p>Example of testing tasks:</p>
+<pre><code>2) Uploading a website file 
+
+  
+
+Create a file titled &quot;index.html&quot; on your local machine. Type whatever you would like in that, it can be a simple phrase or word.  
+
+Connect to the server with SFTP using the parameters above.  
+
+Do you see a file titled ‘Torch Account Information’? If so, can you open it and read the contents? 
+
+Upload the index.html file with an FTP program, such as FileZilla or CyberDuck, to either, &quot;public_html&quot; in your home directory, or /web/FSUID. Upload your index.html to either spot. 
+
+Using a web browser, go to https://torch.cci.fsu.edu/~FSUID. Did your site load properly, and did you get a lock on the webpage (SSL)? 
+</code></pre>
+<h3 id="scope-creep-and-the-first-day" class="headerLink">
+    <a href="#scope-creep-and-the-first-day" class="header-mark"></a>Scope Creep and the First Day</h3><p>As the semester drew closer and closer, and working with professors on the new system, I was worried. What would happen if two users logged in at the exact same second? What about different versions of MacOS, MySQL Workbench, Putty, Mac Terminal, and Gentoo users?</p>
+<p>At the last second, our scope went up dramatically. We decided to incorporate the behemoth MySQL-only server into Torch. This made a lot of sense - MySQL 101 students could simply ignore the web development aspects, and have MySQL credentials they could use throughout their degree.</p>
+<p>Then it arrived - the onslaught of logins. Enjoy the photos below:</p>
+<p><img class="tw-inline" loading="lazy" src=../torch_registrations.png   alt="torch registrations"  ></p>
+<p>There was confusion in one class that <em>we</em> provided the login credentials, cue tickets:</p>
+<p><img class="tw-inline" loading="lazy" src=../tickets.png   alt="tickets"  ></p>
+<p>I eventually setup an auto-responder for the sheer amount of tickets that we could not assist with.</p>
+<p>Some commands I didn’t expect users to run:</p>
+<pre><code>apt install putty-tools (Obviously, students don't have sudo access)
+
+/mnt/c/Users/some_student$ ssh some_student@torch.cci.fsu.edu (Copying Windows CMD SSH, and trying to SSH into the server they're already logged into)
+
+cd C:\Users\some_student\Desktop (Self Explanatory)
+</code></pre>
+<p>Thankfully we had Graylog setup to easily parse through command history. My point here is not to make fun of students not having a solid grasp on the command line - only to point out that I didn’t expect such issues from my testing or thought process. We’ve all been there before.</p>
+<h2 id="fail2ban-woes" class="headerLink">
+    <a href="#fail2ban-woes" class="header-mark"></a>Fail2ban Woes</h2><p>Ever since taking one security class and reading <a href="https://www.amazon.com/Sandworm-Cyberwar-Kremlins-Dangerous-Hackers/dp/0385544405" target="_blank" rel="noopener noreferrer">Sandworm</a>, I’ve become much more interested in securing our hosts.</p>
+<p>You can see some of our attack origins here:</p>
+<p><img class="tw-inline" loading="lazy" src=../geoip.png   alt="attack origins"  ></p>
+<p>While these are automated bot attempts, we did have an unfortunate encounter with some malicious Turks a while back. As such, I have strict fail2ban rules, ranging from SSH attempts to amount of 404 GETs. After having multiple students get caught in the filter (allowing ~10 failed SSH attempts, x3….) I had to raise our filter limit for this server only.</p>
+<p>Graylog was fantastic for searching individual IPV4 addresses and seeing if students were caught in the fail2ban net.</p>
+<h2 id="miscellaneous-notes" class="headerLink">
+    <a href="#miscellaneous-notes" class="header-mark"></a>Miscellaneous Notes</h2><p><strong><a href="https://github.com/tldr-pages/tldr" target="_blank" rel="noopener noreferrer">tl;dr</a></strong> - tldr is a “Collaborative cheatsheets for console commands”, and the only FOSS project I’ve been able to contribute to. I hope some students find a good use for it - I use it everyday. I advertise its existence on the torch.cci.fsu.edu homepage.</p>
+<pre><code>[web15c@torch]~❯ tldr tar
+tar
+
+Archiving utility.
+Often combined with a compression method, such as gzip or bzip.
+More information: &lt;https://www.gnu.org/software/tar&gt;.
+
+- Create an archive from files:
+  tar cf target.tar file1 file2 file3
+
+- Create a gzipped archive:
+  tar czf target.tar.gz file1 file2 file3
+
+- Create a gzipped archive from a directory using relative paths:
+  tar czf target.tar.gz -C path/to/directory .
+
+- Extract a (compressed) archive into the current directory:
+  tar xf source.tar[.gz|.bz2|.xz]
+
+- Extract a (compressed) archive into the target directory:
+  tar xf source.tar[.gz|.bz2|.xz] -C directory
+</code></pre>
+<p>Don’t skimp on the web development - my attempt at the HTML email versus my coworker’s attempt:</p>
+<p><img class="tw-inline" loading="lazy" src=../email_compare.png   alt="email comparison"  ></p>
+<p>And one of the webpages (basic template HTML5UP):</p>
+<p><img class="tw-inline" loading="lazy" src=../website_compare.png   alt="email comparison"  ></p>
+<h2 id="after-action-report" class="headerLink">
+    <a href="#after-action-report" class="header-mark"></a>After Action Report</h2><p>All in all, my first major project for the general public (students in my university’s college) went well. We had around 125 accounts created, and maybe 20 tickets created needing help. ~16% of students having issues is not a good metric. However, with better understanding for faculty, and much improved help resources on the main domain, this should be easier every semester to come.</p>
+<p>Some important goals I have for the future:</p>
+<ul>
+<li>Monitoring /home/ folder size, not just the server’s disk space remaining.</li>
+<li>Better usability analysis of student pain points, and finding solutions.</li>
+<li>Continuing to adjust the server configuration to match course requirements and satisfy faculty (automated grading scripts?).</li>
+<li>One edge-case I couldn’t solve for is users logging in without the student email suffix (@my.fsu.edu) - may do some AD lookups to remedy this.</li>
+</ul>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2020-09-12</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line print:!tw-hidden">
+            <div class="post-info-md"></div>
+            <div class="post-info-share"></div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section class="print:!tw-hidden">
+            <span><button class="tw-text-fgColor-link-muted hover:tw-text-fgColor-link-muted-hover" onclick="window.history.back();">Back</button></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav print:tw-hidden">
+            <a href="/posts/awsccp/" class="next" rel="next" title="AWS Certified Cloud Practitioner">AWS Certified Cloud Practitioner<svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M224.3 273l-136 136c-9.4 9.4-24.6 9.4-33.9 0l-22.6-22.6c-9.4-9.4-9.4-24.6 0-33.9l96.4-96.4-96.4-96.4c-9.4-9.4-9.4-24.6 0-33.9L54.3 103c9.4-9.4 24.6-9.4 33.9 0l136 136c9.5 9.4 9.5 24.6.1 34z"/></svg></a></div>
+</div>
+</article></main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">
+                    Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener noreferrer" title="Hugo 0.134.0">Hugo</a>&nbsp;|&nbsp;Theme - <a href="https://github.com/HEIGE-PCloud/DoIt" target="_blank" rel="noopener noreferrer" title="DoIt 0.4.0"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M402.3 344.9l32-32c5-5 13.7-1.5 13.7 5.7V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V112c0-26.5 21.5-48 48-48h273.5c7.1 0 10.7 8.6 5.7 13.7l-32 32c-1.5 1.5-3.5 2.3-5.7 2.3H48v352h352V350.5c0-2.1.8-4.1 2.3-5.6zm156.6-201.8L296.3 405.7l-90.4 10c-26.2 2.9-48.5-19.2-45.6-45.6l10-90.4L432.9 17.1c22.9-22.9 59.9-22.9 82.7 0l43.2 43.2c22.9 22.9 22.9 60 .1 82.8zM460.1 174L402 115.9 216.2 301.8l-7.3 65.3 65.3-7.3L460.1 174zm64.8-79.7l-43.2-43.2c-4.1-4.1-10.8-4.1-14.8 0L436 82l58.1 58.1 30.9-30.9c4-4.2 4-10.8-.1-14.9z"/></svg> DoIt</a>
+                </div><div class="footer-line"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 448c-110.532 0-200-89.451-200-200 0-110.531 89.451-200 200-200 110.532 0 200 89.451 200 200 0 110.532-89.451 200-200 200zm107.351-101.064c-9.614 9.712-45.53 41.396-104.065 41.396-82.43 0-140.484-61.425-140.484-141.567 0-79.152 60.275-139.401 139.762-139.401 55.531 0 88.738 26.62 97.593 34.779a11.965 11.965 0 0 1 1.936 15.322l-18.155 28.113c-3.841 5.95-11.966 7.282-17.499 2.921-8.595-6.776-31.814-22.538-61.708-22.538-48.303 0-77.916 35.33-77.916 80.082 0 41.589 26.888 83.692 78.277 83.692 32.657 0 56.843-19.039 65.726-27.225 5.27-4.857 13.596-4.039 17.82 1.738l19.865 27.17a11.947 11.947 0 0 1-1.152 15.518z"/></svg>2025<span class="author">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer"></a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer><div class="print:!tw-hidden tw-flex tw-flex-col tw-fixed tw-right-4 tw-bottom-4 tw-gap-2"><a href="#back-to-top" id="back-to-top-button" class="tw-transition-opacity tw-opacity-0 tw-block tw-bg-bgColor-secondary tw-rounded-full" style="padding: 0.6rem; line-height: 1.3rem; font-size: 1rem;" title="Back to Top">
+      <svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6 0-33.9L207 39c9.4-9.4 24.6-9.4 33.9 0l194.3 194.3c9.4 9.4 9.4 24.6 0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3 0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z"/></svg>
+  </a>
+
+  <button id="toc-drawer-button" class="tw-block tw-bg-bgColor-secondary tw-rounded-full md:tw-hidden" style="padding: 0.6rem; line-height: 1.3rem; font-size: 1rem;">
+      <svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg>
+  </button></div>
+
+<script>window.config={"comment":{}};</script><script
+    src="/js/theme.min.js"
+    
+      defer
+    
+  ></script>
+
+<script type="speculationrules">
+  {
+    "prerender": [
+      {
+        "where": { "href_matches": "/*" },
+        "eagerness": "moderate"
+      }
+    ]
+  }
+</script>
+</body>
+
+</html>
